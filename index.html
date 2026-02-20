@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ultimate Study Dashboard</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-color: #0f172a; /* Deep Slate Blue */
+        --card-bg: #1e293b; /* Lighter Slate */
+        --border-color: #334155;
+        --accent-color: #38bdf8; /* Sky Blue */
+        --success-bg: linear-gradient(
+          135deg,
+          #10b981 0%,
+          #059669 100%
+        ); /* Green Gradient */
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --header-glass: rgba(15, 23, 42, 0.85);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+
+      /* --- NAVIGATION BAR --- */
+      nav {
+        background: #1e293b;
+        border-bottom: 1px solid #334155;
+        padding: 15px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
+      }
+      nav a {
+        color: #94a3b8;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      nav a:hover,
+      nav a.active {
+        background: #334155;
+        color: #f1f5f9;
+      }
+
+      /* --- DASHBOARD STATS BAR (STICKY BELOW NAV) --- */
+      .dashboard-header {
+        background-color: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 60px; /* Sits below Nav */
+        z-index: 1000;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .logo {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--accent-color);
+        letter-spacing: -0.5px;
+      }
+
+      .stats-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .progress-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .progress-bar-bg {
+        width: 200px;
+        height: 10px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--success-bg);
+        width: 0%;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .stat-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+      .stat-text span {
+        color: var(--text-main);
+      }
+
+      /* --- MAIN CONTAINER --- */
+      .container {
+        max-width: 1600px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+
+      /* --- MODERN TABLE --- */
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 14px;
+      }
+
+      /* Sticky Headers with Glass Effect */
+      thead th {
+        background-color: var(--header-glass);
+        backdrop-filter: blur(8px);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+
+      /* Positioning Logic for Headers */
+      thead tr:nth-child(1) th {
+        position: static;
+        background: var(--card-bg);
+      }
+      thead tr:nth-child(2) th {
+        position: static;
+        background: var(--card-bg);
+      }
+
+      /* The Important Row (Day/Date) Sticks */
+      thead tr:nth-child(3) th {
+        position: sticky;
+        top: 125px; /* Pushes it below Nav + Stats Header */
+        z-index: 500;
+        border-bottom: 2px solid var(--accent-color);
+        color: var(--text-main);
+        font-size: 0.85rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      /* --- CELLS & ROWS --- */
+      tbody tr {
+        transition:
+          transform 0.1s,
+          background-color 0.2s;
+      }
+
+      tbody tr:hover td:not(.static-col) {
+        background-color: #263344;
+      }
+
+      td {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        padding: 12px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--text-muted);
+      }
+
+      /* Day & Date Columns */
+      td.static-col {
+        font-weight: 700;
+        color: var(--accent-color);
+        background-color: #162032;
+        cursor: default;
+        font-feature-settings: "tnum";
+      }
+
+      /* CHECKED STATE */
+      td.completed {
+        background: var(--success-bg) !important;
+        color: white !important;
+        font-weight: 700;
+        border-color: transparent;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      @keyframes popIn {
+        0% {
+          transform: scale(0.9);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Today's Row Highlight */
+      tr.is-today td {
+        border-top: 2px solid var(--accent-color);
+        border-bottom: 2px solid var(--accent-color);
+        background-color: rgba(56, 189, 248, 0.05);
+      }
+      tr.is-today td:first-child {
+        border-left: 2px solid var(--accent-color);
+      }
+      tr.is-today td:last-child {
+        border-right: 2px solid var(--accent-color);
+      }
+
+      /* Empty Cells */
+      .empty-cell {
+        background-color: #131c2e;
+        cursor: default;
+        opacity: 0.5;
+      }
+      .empty-cell:hover {
+        background-color: #131c2e !important;
+      }
+
+      /* --- BUTTONS --- */
+      .float-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--accent-color);
+        color: #0f172a;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.5);
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          opacity 0.3s;
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .float-btn.visible {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .float-btn:hover {
+        transform: translateY(-3px);
+      }
+
+      /* BACKUP CONTROLS AREA */
+      .controls {
+        margin-top: 40px;
+        border-top: 1px solid #334155;
+        padding-top: 20px;
+        text-align: center;
+        padding-bottom: 40px;
+      }
+
+      .ctrl-btn {
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        border: none;
+        color: white;
+        transition: 0.2s;
+      }
+      .ctrl-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" style="background: #334155; color: white"
+        >📅 Daily Plan</a
+      >
+      <a href="syllabus_tracker.html">📚 Syllabus</a>
+      <a href="mock_scores.html">📊 Mock Scores</a>
+      <a href="quiz_log.html">🧠 Quiz Log</a>
+    </nav>
+
+    <div class="dashboard-header">
+      <div class="logo">100 DAY CHALLENGE</div>
+      <div class="stats-container">
+        <div class="progress-wrapper">
+          <div class="stat-text">
+            Progress: <span id="percent-text">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <table id="studyTable">
+        <thead>
+          <tr>
+            <th
+              colspan="2"
+              rowspan="2"
+              style="
+                background: #162032;
+                border: 1px solid var(--border-color);
+                border-radius: 8px 0 0 0;
+                color: var(--accent-color);
+                font-size: 1.3rem;
+                font-weight: 800;
+                vertical-align: middle;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+              "
+            >
+              DAY <span id="currentDayDisplay" style="color: white">0</span>
+              <!-- <span style="font-size: 0.9rem; color: #94a3b8">/103</span> -->
+            </th>
+            <th colspan="3" style="border-radius: 8px 8px 0 0">SSC Group</th>
+            <th colspan="2" style="border-radius: 8px 8px 0 0">RRB Group</th>
+            <th style="border-radius: 8px 8px 0 0">UPSI</th>
+          </tr>
+          <tr>
+            <th>RBE Daily Targets</th>
+            <th>GS PARMAR 4.0</th>
+            <th>ENGLISH AMAN SIR</th>
+            <th>GS</th>
+            <th>MATH/RESONING</th>
+            <th>Hindi</th>
+          </tr>
+          <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>9AM - 3PM</th>
+            <th>3.30PM - 5PM</th>
+            <th>5PM - 6PM</th>
+            <th>8PM - 9PM</th>
+            <th>10PM - 12PM</th>
+            <th>12AM - 2AM</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+
+      <div class="controls">
+        <h3 style="color: #94a3b8; font-size: 1rem; margin-bottom: 15px">
+          Data Management
+        </h3>
+
+        <button
+          class="ctrl-btn"
+          onclick="backupData()"
+          style="background: #0ea5e9"
+        >
+          ⬇️ Backup All Data
+        </button>
+
+        <button
+          class="ctrl-btn"
+          onclick="document.getElementById('restoreFile').click()"
+          style="background: #22c55e"
+        >
+          ⬆️ Restore Data
+        </button>
+        <input
+          type="file"
+          id="restoreFile"
+          style="display: none"
+          onchange="restoreData(this)"
+          accept=".json"
+        />
+
+        <br /><br />
+        <!-- <button
+          class="ctrl-btn"
+          onclick="clearAllProgress()"
+          style="background: #333; border: 1px solid #ef4444; color: #ef4444"
+        >
+          Reset Daily Plan
+        </button> -->
+      </div>
+    </div>
+
+    <button id="jumpBtn" class="float-btn" onclick="scrollToToday()">
+      Go to Today 📅
+    </button>
+
+    <script>
+      const startDate = new Date("2026-02-18");
+      const totalDays = 103;
+      const tbody = document.getElementById("tableBody");
+      let todayRowElement = null;
+
+      // --- GENERATION LOGIC ---
+
+      function generateTable() {
+        let html = "";
+        let activeDay = "0";
+        const todayStr = new Date()
+          .toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+          .replace(/\//g, "-");
+
+        for (let i = 1; i <= totalDays; i++) {
+          let currentDate = new Date(startDate);
+          currentDate.setDate(startDate.getDate() + (i - 1));
+          let dateStr = currentDate
+            .toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })
+            .replace(/\//g, "-");
+
+          const isToday = dateStr === todayStr;
+          const rowClass = isToday ? "is-today" : "";
+          if (isToday) activeDay = i;
+
+          let rbe = "RBE Daily targets";
+          let parmar = "";
+          let english = "";
+          let gs8pm = "";
+          let math = "";
+          let upsi = "";
+
+          if (i <= 3) parmar = `Economics - ${i}`;
+          // else if (i <= 14) parmar = `Polity - ${i - 3}`;
+          else if (i <= 11) parmar = `Polity - ${i - 3}`;
+          // else if (i === 18) parmar = "Polity - 15";
+          else if (i <= 23) parmar = `History - ${i - 11}`;
+          else if (i <= 35) parmar = `Geo - ${i - 23}`;
+          else if (i <= 55) parmar = `Science And Static - ${i - 35}`;
+          else parmar = "Revision";
+
+          if (i <= 42) english = `Lecture -${i}`;
+          else english = "Revision";
+
+          if (i <= 25) gs8pm = `PARMAR PYQ -${i}`;
+          else gs8pm = "";
+
+          if (i <= 26) {
+            if (i % 2 !== 0) math = "MATH/REASONING";
+            else math = `FULL MOCK-${i / 2}`;
+          } else {
+            math = "";
+          }
+
+          if (i <= 11) upsi = `Lecture till-${i * 3}`;
+          else if (i <= 22) upsi = "MOCK + REVISION";
+          else if (i <= 24) upsi = "";
+          else if (i === 25) upsi = "UP GK";
+          else if (i <= 53) upsi = `Lecture -${i - 25}`;
+          else if (i <= 59) upsi = "Revision";
+          else upsi = "";
+
+          html += `<tr class="${rowClass}" id="day-${i}">
+                <td class="static-col">${i}</td>
+                <td class="static-col">${dateStr}</td>
+                <td onclick="toggle(this)">${rbe}</td>
+                <td onclick="toggle(this)">${parmar}</td>
+                <td onclick="toggle(this)">${english}</td>
+                <td onclick="toggle(this)" class="${gs8pm === "" ? "empty-cell" : ""}">${gs8pm}</td>
+                <td onclick="toggle(this)" class="${math === "" ? "empty-cell" : ""}">${math}</td>
+                <td onclick="toggle(this)" class="${upsi === "" ? "empty-cell" : ""}">${upsi}</td>
+            </tr>`;
+        }
+
+        tbody.innerHTML = html;
+        document.getElementById("currentDayDisplay").innerText = activeDay;
+        loadProgress();
+      }
+
+      // --- INTERACTIVITY ---
+      function toggle(cell) {
+        if (cell.innerHTML === "" || cell.classList.contains("empty-cell"))
+          return;
+        cell.classList.toggle("completed");
+        saveProgress();
+        updateStats();
+      }
+
+      function updateStats() {
+        const totalTasks = document.querySelectorAll(
+          "tbody td:not(.static-col):not(.empty-cell)",
+        ).length;
+        const completedTasks =
+          document.querySelectorAll("tbody td.completed").length;
+        const percentage = Math.round((completedTasks / totalTasks) * 100);
+
+        document.getElementById("percent-text").innerText = percentage + "%";
+        document.getElementById("progress-fill").style.width = percentage + "%";
+      }
+
+      // --- SAVE/LOAD ---
+      function saveProgress() {
+        const data = [];
+        const rows = document.querySelectorAll("#tableBody tr");
+        rows.forEach((row) => {
+          const rowData = [];
+          for (let j = 2; j < row.cells.length; j++) {
+            rowData.push(row.cells[j].classList.contains("completed") ? 1 : 0);
+          }
+          data.push(rowData);
+        });
+        localStorage.setItem("studyProgressUltimate", JSON.stringify(data));
+      }
+
+      function loadProgress() {
+        const saved = localStorage.getItem("studyProgressUltimate");
+        if (saved) {
+          const data = JSON.parse(saved);
+          const rows = document.querySelectorAll("#tableBody tr");
+          rows.forEach((row, i) => {
+            if (data[i]) {
+              for (let j = 0; j < data[i].length; j++) {
+                if (data[i][j] === 1) {
+                  row.cells[j + 2].classList.add("completed");
+                }
+              }
+            }
+          });
+        }
+        updateStats();
+        todayRowElement = document.querySelector(".is-today");
+      }
+
+      function clearAllProgress() {
+        if (confirm("Start over from 0%?")) {
+          localStorage.removeItem("studyProgressUltimate");
+          location.reload();
+        }
+      }
+
+      function scrollToToday() {
+        if (todayRowElement) {
+          todayRowElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          todayRowElement.style.transition = "background-color 0.5s";
+          todayRowElement.style.backgroundColor = "rgba(56, 189, 248, 0.3)";
+          setTimeout(() => {
+            todayRowElement.style.backgroundColor = "";
+          }, 1000);
+        } else {
+          alert("Today's date is not in the plan range yet!");
+        }
+      }
+
+      window.addEventListener("scroll", () => {
+        const btn = document.getElementById("jumpBtn");
+        if (window.scrollY > 300) btn.classList.add("visible");
+        else btn.classList.remove("visible");
+      });
+
+      // --- BACKUP & RESTORE FUNCTIONS ---
+      function backupData() {
+        const data = {
+          study: localStorage.getItem("studyProgressUltimate"),
+          syllabus: localStorage.getItem("sscTrackerData"),
+          scores: localStorage.getItem("sscScores_final"),
+          quizDB: localStorage.getItem("sscQuiz_DB"),
+          quizStatus: localStorage.getItem("sscQuiz_Status"),
+          // Also grab v2/v3 data just in case user has old data mixed
+          scoresV3: localStorage.getItem("sscScores_v3"),
+          scoresTier1: localStorage.getItem("sscTier1Scores_v2"),
+        };
+
+        const blob = new Blob([JSON.stringify(data)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download =
+          "SSC_PREP_BACKUP_" + new Date().toISOString().slice(0, 10) + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      function restoreData(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const data = JSON.parse(e.target.result);
+
+            if (data.study)
+              localStorage.setItem("studyProgressUltimate", data.study);
+            if (data.syllabus)
+              localStorage.setItem("sscTrackerData", data.syllabus);
+            if (data.scores)
+              localStorage.setItem("sscScores_final", data.scores);
+            if (data.quizDB) localStorage.setItem("sscQuiz_DB", data.quizDB);
+            if (data.quizStatus)
+              localStorage.setItem("sscQuiz_Status", data.quizStatus);
+
+            // Restore older versions if present in backup but missing in current
+            if (data.scoresV3 && !data.scores)
+              localStorage.setItem("sscScores_v3", data.scoresV3);
+
+            alert("Data Restored Successfully! The page will now reload.");
+            location.reload();
+          } catch (err) {
+            alert("Error: Invalid backup file.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // Run Init
+
+      generateTable();
+      if (todayRowElement) setTimeout(scrollToToday, 500);
+    </script>
+  </body>
+</html>
+
+```

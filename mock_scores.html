@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSC CGL Pro Analytics</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --border: #334155;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --green: #10b981;
+        --red: #ef4444;
+        --yellow: #f59e0b;
+        --purple: #a855f7;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* NAV */
+      nav {
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 15px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      nav a {
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: 0.2s;
+        cursor: pointer;
+      }
+      nav a:hover,
+      nav a.active {
+        background: var(--border);
+        color: white;
+      }
+
+      /* LAYOUT */
+      .container {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 20px;
+      }
+      @media (max-width: 1100px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      h2 {
+        margin-top: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
+        font-size: 1.1rem;
+        color: #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* STATS GRID */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .stat-box {
+        background: rgba(15, 23, 42, 0.5);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        text-align: center;
+      }
+      .stat-val {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .stat-lbl {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 5px;
+      }
+
+      /* ADVANCED FORM */
+      .input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 5px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: white;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+      input:focus {
+        outline: 1px solid var(--accent);
+      }
+
+      .score-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+        font-size: 0.85rem;
+      }
+      .score-table th {
+        color: var(--muted);
+        font-weight: 600;
+        text-align: center;
+        padding-bottom: 8px;
+      }
+      .score-table td {
+        padding: 4px;
+      }
+      .score-table input {
+        text-align: center;
+        padding: 8px;
+      }
+      .row-lbl {
+        font-weight: 600;
+        color: #cbd5e1;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--accent);
+        color: #0f172a;
+        border: none;
+        border-radius: 6px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+      }
+      .live-score {
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--green);
+        margin: 15px 0;
+        background: rgba(16, 185, 129, 0.1);
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px dashed var(--green);
+      }
+
+      /* CHARTS & HEATMAP */
+      .chart-wrapper {
+        position: relative;
+        height: 280px;
+        width: 100%;
+      }
+      .dual-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .heatmap-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .heatmap-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+      }
+      .heatmap-item:last-child {
+        border: none;
+      }
+      .heat-count {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--red);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.8rem;
+        border: 1px solid var(--red);
+      }
+
+      .hist-item {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .hist-item:last-child {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html">📅 Daily Plan</a>
+      <a href="syllabus_tracker.html">📚 Syllabus</a>
+      <a href="mock_scores.html" class="active">📊 Pro Analytics</a>
+      <a href="quiz_log.html">🧠 Quiz Log</a>
+    </nav>
+
+    <div class="container">
+      <div class="main-content">
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="st-avg">0</div>
+            <div class="stat-lbl">Overall Avg</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: var(--green)" id="st-recent">
+              0
+            </div>
+            <div class="stat-lbl">Last 5 Avg</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: var(--yellow)" id="st-acc">
+              0%
+            </div>
+            <div class="stat-lbl">Avg Accuracy</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: var(--red)" id="st-neg">0</div>
+            <div class="stat-lbl">Avg Neg. Marks</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Overall Score Trend</h2>
+          <div class="chart-wrapper"><canvas id="mainChart"></canvas></div>
+        </div>
+
+        <div class="card">
+          <h2>Sectional Performance (Subject Trends)</h2>
+          <div class="chart-wrapper"><canvas id="sectionChart"></canvas></div>
+        </div>
+
+        <div class="dual-grid">
+          <div class="card">
+            <h2>Average Time Allocation</h2>
+            <div class="chart-wrapper" style="height: 220px">
+              <canvas id="timeChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>
+              🔥 Weakness Heatmap
+              <span
+                style="
+                  font-size: 0.75rem;
+                  color: var(--muted);
+                  font-weight: normal;
+                "
+                >(From Quiz Log)</span
+              >
+            </h2>
+            <ul class="heatmap-list" id="heatmapList">
+              <div
+                style="text-align: center; padding: 40px; color: var(--muted)"
+              >
+                Add incorrect questions to your Quiz Log to see weaknesses.
+              </div>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="card" style="position: sticky; top: 80px">
+          <h2>Add Mock (Auto-Calculator)</h2>
+          <form id="scoreForm">
+            <div class="input-grid" style="grid-template-columns: 1fr 1fr">
+              <div class="form-group">
+                <label>Date</label><input type="date" id="mDate" required />
+              </div>
+              <div class="form-group">
+                <label>Provider</label>
+                <select id="mProv">
+                  <option>Testbook</option>
+                  <option>Oliveboard</option>
+                  <option>RBE</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px">
+              <label>Mock Name</label
+              ><input
+                type="text"
+                id="mName"
+                placeholder="e.g. Full Test 5"
+                required
+              />
+            </div>
+
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th style="text-align: left">Subject</th>
+                  <th>Correct</th>
+                  <th>Wrong</th>
+                  <th>Time (m)</th>
+                </tr>
+              </thead>
+              <tbody oninput="liveCalculate()">
+                <tr>
+                  <td class="row-lbl" style="color: var(--purple)">
+                    Reasoning
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="cR"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="wR"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="tR"
+                      min="0"
+                      max="60"
+                      placeholder="0"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="row-lbl" style="color: var(--yellow)">GK</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="cG"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="wG"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="tG"
+                      min="0"
+                      max="60"
+                      placeholder="0"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="row-lbl" style="color: var(--green)">Quant</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="cQ"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="wQ"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="tQ"
+                      min="0"
+                      max="60"
+                      placeholder="0"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="row-lbl" style="color: var(--accent)">English</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="cE"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="wE"
+                      min="0"
+                      max="25"
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      id="tE"
+                      min="0"
+                      max="60"
+                      placeholder="0"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="live-score" id="liveScore">Total: 0 / 200</div>
+            <button type="submit" class="btn">Save Analytics Data</button>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top: 20px">
+          <h2>History</h2>
+          <div
+            id="historyList"
+            style="max-height: 300px; overflow-y: auto"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- DATA MANAGEMENT ---
+      let db = JSON.parse(localStorage.getItem("sscScores_Analytics")) || [];
+      let quizDb = JSON.parse(localStorage.getItem("sscQuiz_DB")) || [];
+      let charts = {}; // Store chart instances
+
+      document.getElementById("mDate").valueAsDate = new Date();
+
+      // Set defaults globally for Chart.js
+      Chart.defaults.color = "#94a3b8";
+      Chart.defaults.font.family = "Inter";
+
+      // --- 1. LIVE CALCULATOR ---
+      function liveCalculate() {
+        const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+        const total =
+          (getV("cR") + getV("cG") + getV("cQ") + getV("cE")) * 2 -
+          (getV("wR") + getV("wG") + getV("wQ") + getV("wE")) * 0.5;
+        document.getElementById("liveScore").innerText =
+          `Total: ${Math.max(0, total)} / 200`;
+      }
+
+      // --- 2. FORM SUBMISSION ---
+      document.getElementById("scoreForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+        const mockData = {
+          id: Date.now(),
+          date: document.getElementById("mDate").value,
+          prov: document.getElementById("mProv").value,
+          name: document.getElementById("mName").value,
+          data: {
+            R: { c: getV("cR"), w: getV("wR"), t: getV("tR") },
+            G: { c: getV("cG"), w: getV("wG"), t: getV("tG") },
+            Q: { c: getV("cQ"), w: getV("wQ"), t: getV("tQ") },
+            E: { c: getV("cE"), w: getV("wE"), t: getV("tE") },
+          },
+        };
+
+        // Calculate Totals
+        const d = mockData.data;
+        mockData.tCor = d.R.c + d.G.c + d.Q.c + d.E.c;
+        mockData.tWro = d.R.w + d.G.w + d.Q.w + d.E.w;
+        mockData.tTime = d.R.t + d.G.t + d.Q.t + d.E.t;
+        mockData.totalScore = mockData.tCor * 2 - mockData.tWro * 0.5;
+
+        db.push(mockData);
+        localStorage.setItem("sscScores_Analytics", JSON.stringify(db));
+
+        // Reset Inputs
+        [
+          "cR",
+          "wR",
+          "tR",
+          "cG",
+          "wG",
+          "tG",
+          "cQ",
+          "wQ",
+          "tQ",
+          "cE",
+          "wE",
+          "tE",
+        ].forEach((id) => (document.getElementById(id).value = ""));
+        document.getElementById("liveScore").innerText = "Total: 0 / 200";
+        updateDashboard();
+      });
+
+      // --- 3. UPDATE DASHBOARD ---
+      function updateDashboard() {
+        db.sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort chronologically
+
+        renderStats();
+        renderCharts();
+        renderHistory();
+        renderHeatmap();
+      }
+
+      function renderStats() {
+        if (db.length === 0) return;
+
+        // Overall Avg
+        const totalSum = db.reduce((sum, m) => sum + m.totalScore, 0);
+        document.getElementById("st-avg").innerText = (
+          totalSum / db.length
+        ).toFixed(1);
+
+        // Recent 5 Avg
+        const recent = db.slice(-5);
+        const recSum = recent.reduce((sum, m) => sum + m.totalScore, 0);
+        document.getElementById("st-recent").innerText = (
+          recSum / recent.length
+        ).toFixed(1);
+
+        // Accuracy & Negative Marks
+        let totAtt = 0,
+          totCor = 0,
+          totNeg = 0;
+        db.forEach((m) => {
+          totAtt += m.tCor + m.tWro;
+          totCor += m.tCor;
+          totNeg += m.tWro * 0.5;
+        });
+        document.getElementById("st-acc").innerText =
+          totAtt > 0 ? Math.round((totCor / totAtt) * 100) + "%" : "0%";
+        document.getElementById("st-neg").innerText =
+          "-" + (totNeg / db.length).toFixed(1);
+      }
+
+      function renderCharts() {
+        if (db.length === 0) return;
+
+        const labels = db.map((m) => m.date.slice(5) + ` (${m.name})`);
+
+        // Destroy old charts to prevent overlapping
+        if (charts.main) charts.main.destroy();
+        if (charts.sec) charts.sec.destroy();
+        if (charts.time) charts.time.destroy();
+
+        // 1. MAIN CHART
+        const ctxMain = document.getElementById("mainChart").getContext("2d");
+        charts.main = new Chart(ctxMain, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Total Score",
+                data: db.map((m) => m.totalScore),
+                borderColor: "#38bdf8",
+                backgroundColor: "rgba(56, 189, 248, 0.1)",
+                borderWidth: 3,
+                pointBackgroundColor: "#0f172a",
+                pointBorderColor: "#38bdf8",
+                pointRadius: 5,
+                fill: true,
+                tension: 0.3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { min: 0, max: 200, grid: { color: "#334155" } },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+
+        // 2. SECTIONAL CHART
+        const ctxSec = document.getElementById("sectionChart").getContext("2d");
+        charts.sec = new Chart(ctxSec, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Quant",
+                data: db.map((m) => m.data.Q.c * 2 - m.data.Q.w * 0.5),
+                borderColor: "#10b981",
+                tension: 0.3,
+              },
+              {
+                label: "English",
+                data: db.map((m) => m.data.E.c * 2 - m.data.E.w * 0.5),
+                borderColor: "#38bdf8",
+                tension: 0.3,
+              },
+              {
+                label: "Reasoning",
+                data: db.map((m) => m.data.R.c * 2 - m.data.R.w * 0.5),
+                borderColor: "#a855f7",
+                tension: 0.3,
+              },
+              {
+                label: "GK",
+                data: db.map((m) => m.data.G.c * 2 - m.data.G.w * 0.5),
+                borderColor: "#f59e0b",
+                tension: 0.3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { min: 0, max: 50, grid: { color: "#334155" } },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+
+        // 3. TIME ALLOCATION CHART
+        let tR = 0,
+          tG = 0,
+          tQ = 0,
+          tE = 0;
+        db.forEach((m) => {
+          tR += m.data.R.t;
+          tG += m.data.G.t;
+          tQ += m.data.Q.t;
+          tE += m.data.E.t;
+        });
+
+        const ctxTime = document.getElementById("timeChart").getContext("2d");
+        charts.time = new Chart(ctxTime, {
+          type: "doughnut",
+          data: {
+            labels: ["Reasoning", "GK", "Quant", "English"],
+            datasets: [
+              {
+                data: [tR, tG, tQ, tE],
+                backgroundColor: ["#a855f7", "#f59e0b", "#10b981", "#38bdf8"],
+                borderWidth: 0,
+                hoverOffset: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "right" } },
+            cutout: "70%",
+          },
+        });
+      }
+
+      function renderHeatmap() {
+        const list = document.getElementById("heatmapList");
+        if (quizDb.length === 0) return;
+
+        // Count mistakes per topic
+        const topicCounts = {};
+        quizDb.forEach((q) => {
+          const label = `${q.topic} (${q.sub})`;
+          topicCounts[label] = (topicCounts[label] || 0) + 1;
+        });
+
+        // Convert to array and sort highest to lowest
+        const sortedTopics = Object.entries(topicCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5); // Top 5
+
+        list.innerHTML = "";
+        sortedTopics.forEach(([topic, count], idx) => {
+          let icon = idx === 0 ? "🔥" : idx === 1 ? "⚠️" : "📖";
+          list.innerHTML += `
+                <li class="heatmap-item">
+                    <span>${icon} ${topic}</span>
+                    <span class="heat-count">${count} Mistakes</span>
+                </li>`;
+        });
+      }
+
+      function renderHistory() {
+        const div = document.getElementById("historyList");
+        if (db.length === 0) {
+          div.innerHTML =
+            '<div style="color:#64748b;">No mocks added yet.</div>';
+          return;
+        }
+
+        div.innerHTML = "";
+        [...db].reverse().forEach((m) => {
+          div.innerHTML += `
+                <div class="hist-item">
+                    <div>
+                        <div style="font-weight:bold; color:white;">${m.name} <span style="font-size:0.7rem; color:var(--muted); background:#334155; padding:2px 6px; border-radius:4px;">${m.prov}</span></div>
+                        <div style="font-size:0.8rem; color:var(--muted);">${m.date} &bull; ${m.tTime} mins</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <span style="font-size:1.2rem; font-weight:800; color:var(--accent);">${m.totalScore}</span>
+                        <span style="color:var(--red); cursor:pointer;" onclick="deleteMock(${m.id})">🗑️</span>
+                    </div>
+                </div>`;
+        });
+      }
+
+      window.deleteMock = (id) => {
+        if (confirm("Delete this mock data?")) {
+          db = db.filter((m) => m.id !== id);
+          localStorage.setItem("sscScores_Analytics", JSON.stringify(db));
+          if (db.length === 0)
+            location.reload(); // Hard reset UI if empty
+          else updateDashboard();
+        }
+      };
+
+      // INIT
+      updateDashboard();
+    </script>
+  </body>
+</html>
