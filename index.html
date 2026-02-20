@@ -38,26 +38,31 @@
         
         thead { position: sticky; top: 0; z-index: 10; background: var(--card); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
         th { padding: 12px; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); color: #cbd5e1; font-weight: 700; font-size: 0.9rem; }
-        td { padding: 10px; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); font-size: 0.95rem; }
+        td { padding: 8px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
         th:last-child, td:last-child { border-right: none; }
         
         /* TABLE STYLES */
-        .col-day { font-weight: 800; color: var(--accent); }
-        .col-date { color: var(--muted); font-size: 0.85rem; }
+        .col-day { font-weight: 800; color: var(--accent); text-align: center; }
+        .col-date { color: var(--muted); font-size: 0.85rem; text-align: center; }
         .is-today { background: rgba(56, 189, 248, 0.1) !important; border: 2px solid var(--accent); }
         .is-today td { font-weight: bold; color: white; }
         
+        /* CLICKABLE GREEN CELLS */
+        td:hover:not(.col-day):not(.col-date) { background: rgba(255, 255, 255, 0.05); }
+        .cell-done { background: rgba(16, 185, 129, 0.15) !important; color: var(--green); border-bottom: 1px solid var(--green); border-right: 1px solid var(--green); }
+        .cell-content { display: flex; justify-content: space-between; align-items: center; gap: 8px; pointer-events: none; }
+        .target-text { flex: 1; }
+        
         /* CHECKBOXES */
-        input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; background: #0f172a; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; position: relative; transition: 0.2s; }
+        input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; background: #0f172a; border: 2px solid var(--border); border-radius: 4px; pointer-events: auto; cursor: pointer; position: relative; transition: 0.2s; flex-shrink: 0; }
         input[type="checkbox"]:checked { background: var(--green); border-color: var(--green); }
-        input[type="checkbox"]:checked::after { content: '✔'; position: absolute; color: #0f172a; font-size: 14px; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        input[type="checkbox"]:hover { border-color: var(--accent); }
+        input[type="checkbox"]:checked::after { content: '✔'; position: absolute; color: #0f172a; font-size: 12px; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     </style>
 </head>
 <body>
 
     <nav>
-        <a href="index.html" class="active">📅 Daily Plan</a>
+        <a href="index.html" class="active">📅 Daily Plan ☁️</a>
         <a href="syllabus_tracker.html">📚 Syllabus</a>
         <a href="mock_scores.html">📊 Mock Scores</a>
         <a href="quiz_log.html">🧠 Quiz Log ☁️</a>
@@ -66,16 +71,13 @@
     <div class="dashboard-header">
         <div class="progress-container">
             <div class="stat-text">
-                <span>103-Day Completion Tracker</span>
+                <span>103-Day Completion Tracker (Cloud Synced)</span>
                 <span id="progressText" style="color:var(--green);">0%</span>
             </div>
             <div class="progress-bar-bg"><div class="progress-fill" id="progressBar"></div></div>
         </div>
-        <div style="display:flex; gap:10px;">
-            <button onclick="exportData()" class="nav-btn">Backup Data 💾</button>
-            <label class="nav-btn" style="cursor:pointer;">
-                Restore Data 📂 <input type="file" style="display:none;" accept=".json" onchange="importData(event)">
-            </label>
+        <div style="display:flex; gap:10px; align-items: center;">
+            <span id="cloudStatus" style="color: var(--accent); font-size: 0.85rem; font-weight: bold; margin-right: 15px;">⏳ Connecting...</span>
             <button onclick="goToToday()" class="btn-primary">Go To Today 🎯</button>
         </div>
     </div>
@@ -115,8 +117,25 @@
         </table>
     </div>
 
-<script>
-    // System Constants
+<script type="module">
+    // --- FIREBASE CLOUD SETUP ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVAXOdqKnBgFKSe3tKn0omfeib4AdfzVU",
+      authDomain: "ssc-command-center-285cd.firebaseapp.com",
+      projectId: "ssc-command-center-285cd",
+      storageBucket: "ssc-command-center-285cd.firebasestorage.app",
+      messagingSenderId: "512383276315",
+      appId: "1:512383276315:web:95da05a6a05d3efb48efbe",
+      measurementId: "G-G3DWYBB80L"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- TABLE GENERATION ---
     const TOTAL_DAYS = 103;
     const START_DATE = new Date('2026-02-18T00:00:00'); 
     
@@ -125,117 +144,139 @@
         let html = '';
         let activeDayNumber = "0"; 
 
-        // Get exact today string formatted as DD-MM-YYYY
-        const todayStr = new Date().toLocaleDateString('en-GB', { 
-            day: '2-digit', month: '2-digit', year: 'numeric' 
-        }).replace(/\//g, '-');
+        const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
 
         for (let i = 1; i <= TOTAL_DAYS; i++) {
-            // Calculate Date
             const d = new Date(START_DATE);
             d.setDate(START_DATE.getDate() + (i - 1));
             
-            // Format string exactly like en-GB outputs
             const dd = String(d.getDate()).padStart(2, '0');
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const yyyy = d.getFullYear();
             const dateStr = `${dd}-${mm}-${yyyy}`;
 
-            // Check if this row is "Today"
             const isToday = (dateStr === todayStr);
             const rowClass = isToday ? 'is-today' : '';
             const rowId = isToday ? 'todayRow' : `row-${i}`;
             
             if (isToday) activeDayNumber = i;
 
+            // Generate cell function to include specific Text Targets + Checkbox
+            const createCell = (slotNum, text) => `
+                <td onclick="window.toggleTask('d${i}-s${slotNum}', this)">
+                    <div class="cell-content">
+                        <span class="target-text">${text}</span>
+                        <input type="checkbox" id="d${i}-s${slotNum}" class="task-chk" onclick="event.stopPropagation(); window.toggleCheckboxOnly(this, this.closest('td'))">
+                    </div>
+                </td>
+            `;
+
             html += `
                 <tr class="${rowClass}" id="${rowId}">
                     <td class="col-day">Day ${i}</td>
                     <td class="col-date">${dateStr}</td>
-                    <td><input type="checkbox" class="task-chk" id="d${i}-s1"></td>
-                    <td><input type="checkbox" class="task-chk" id="d${i}-s2"></td>
-                    <td><input type="checkbox" class="task-chk" id="d${i}-s3"></td>
-                    <td><input type="checkbox" class="task-chk" id="d${i}-s4"></td>
-                    <td><input type="checkbox" class="task-chk" id="d${i}-s5"></td>
-                    <td><input type="checkbox" class="task-chk" id="d${i}-s6"></td>
+                    ${createCell(1, `RBE Target ${i}`)}
+                    ${createCell(2, `Parmar Lecture ${i}`)}
+                    ${createCell(3, `English Vocab/Grammar`)}
+                    ${createCell(4, `GS Revision`)}
+                    ${createCell(5, `Maths/Reasoning Prac`)}
+                    ${createCell(6, `Hindi Target ${i}`)}
                 </tr>
             `;
         }
 
         tbody.innerHTML = html;
         document.getElementById('currentDayDisplay').innerText = activeDayNumber;
-        loadProgress();
     }
 
-    // --- LOGIC & DATA MANAGEMENT ---
-    function loadProgress() {
-        const data = JSON.parse(localStorage.getItem('sscDailyTracker_v1')) || {};
-        document.querySelectorAll('.task-chk').forEach(chk => {
-            chk.checked = data[chk.id] || false;
-            chk.addEventListener('change', (e) => {
-                data[e.target.id] = e.target.checked;
-                localStorage.setItem('sscDailyTracker_v1', JSON.stringify(data));
-                updateProgressBar();
-            });
-        });
-        updateProgressBar();
-    }
+    // --- CELL TOGGLE & CLOUD SYNC LOGIC ---
 
-    function updateProgressBar() {
+    // When the whole <td> is clicked
+    window.toggleTask = (id, tdElement) => {
+        const chk = document.getElementById(id);
+        chk.checked = !chk.checked; // Flip the checkbox
+        window.updateUIAndCloud(id, chk.checked, tdElement);
+    };
+
+    // When only the little checkbox is clicked directly
+    window.toggleCheckboxOnly = (chkElement, tdElement) => {
+        window.updateUIAndCloud(chkElement.id, chkElement.checked, tdElement);
+    };
+
+    // Master function to handle green background and cloud save
+    window.updateUIAndCloud = async (id, isChecked, tdElement) => {
+        // 1. Instantly update UI (Optimistic Update)
+        if (isChecked) {
+            tdElement.classList.add('cell-done');
+        } else {
+            tdElement.classList.remove('cell-done');
+        }
+        window.updateProgressBar();
+
+        // 2. Save silently to Firebase
+        document.getElementById('cloudStatus').innerText = "☁️ Saving...";
+        try {
+            await setDoc(doc(db, "ssc_daily_plan", "progress"), {
+                [id]: isChecked
+            }, { merge: true });
+            document.getElementById('cloudStatus').innerText = "☁️ Synced";
+        } catch(e) {
+            console.error("Firebase Sync Error", e);
+            document.getElementById('cloudStatus').innerText = "❌ Sync Error";
+        }
+    };
+
+    // --- PROGRESS BAR ---
+    window.updateProgressBar = () => {
         const total = document.querySelectorAll('.task-chk').length;
         const checked = document.querySelectorAll('.task-chk:checked').length;
         const percentage = total === 0 ? 0 : Math.round((checked / total) * 100);
         
         document.getElementById('progressBar').style.width = percentage + '%';
         document.getElementById('progressText').innerText = percentage + '% Complete';
-    }
+    };
 
-    function goToToday() {
+    // --- GO TO TODAY ---
+    window.goToToday = () => {
         const row = document.getElementById('todayRow');
         if (row) {
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Flash effect for emphasis
             row.style.backgroundColor = 'rgba(16, 185, 129, 0.3)';
             setTimeout(() => { row.style.backgroundColor = ''; }, 1000);
         } else {
             alert("Today's date is outside the 103-Day tracker range!");
         }
-    }
+    };
 
-    // --- BACKUP & RESTORE DATA ---
-    function exportData() {
-        const data = localStorage.getItem('sscDailyTracker_v1') || "{}";
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `SSC_Tracker_Backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedData = JSON.parse(e.target.result);
-                localStorage.setItem('sscDailyTracker_v1', JSON.stringify(importedData));
-                alert("✅ Data Restored Successfully!");
-                loadProgress(); // Reload UI
-            } catch (err) {
-                alert("❌ Invalid Backup File.");
+    // --- LOAD CLOUD DATA ON STARTUP ---
+    async function loadCloudProgress() {
+        try {
+            const docSnap = await getDoc(doc(db, "ssc_daily_plan", "progress"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                // Loop through all checkboxes and apply cloud data
+                document.querySelectorAll('.task-chk').forEach(chk => {
+                    if (data[chk.id] === true) {
+                        chk.checked = true;
+                        chk.closest('td').classList.add('cell-done');
+                    }
+                });
+                window.updateProgressBar();
             }
-        };
-        reader.readAsText(file);
+            document.getElementById('cloudStatus').innerText = "☁️ Synced";
+        } catch(e) {
+            console.error("Error loading cloud data", e);
+            document.getElementById('cloudStatus').innerText = "❌ Offline Mode";
+        }
     }
 
     // Initialize the Application
     generateTable();
+    loadCloudProgress(); // Fetch checkboxes from cloud
+    
     // Delay scroll slightly to ensure DOM is fully rendered
-    setTimeout(goToToday, 500); 
+    setTimeout(window.goToToday, 500); 
 
 </script>
 </body>
