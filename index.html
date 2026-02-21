@@ -3,259 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>103 Day Challenge - SSC CGL</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>Prep Ultimate Tracker</title>
     <style>
         :root {
-            --bg-main: #0f172a;       
-            --bg-panel: #1e293b;      
-            --border: #334155;        
-            --text-main: #cbd5e1;     
-            --text-muted: #64748b;    
-            --accent: #38bdf8;        
-            --green: #10b981;         
-            --hover: rgba(255, 255, 255, 0.05);
+            --primary: #4F46E5;
+            --primary-light: #E0E7FF;
+            --bg: #F9FAFB;
+            --surface: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --hover-row: #F3F4F6;
         }
 
-        body { background: var(--bg-main); color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* TOP NAVIGATION */
-        nav { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 12px; display: flex; gap: 20px; justify-content: center; z-index: 100; flex-shrink: 0; }
-        nav a { color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 6px 12px; border-radius: 6px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-        nav a:hover { background: var(--border); color: white; }
-        nav a.active { background: rgba(255,255,255,0.1); color: white; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+        }
 
-        /* HEADER SECTION */
-        .challenge-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .header-title { margin: 0; color: var(--accent); font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
-        .progress-section { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; font-weight: 600; }
-        .progress-bar-container { width: 200px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.3s ease; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-        /* TABLE CONTAINER (Scrollable Area) */
-        .table-wrapper { flex: 1; overflow: auto; padding: 0 30px 30px 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: -1px; }
-        
-        /* NORMAL TABLE HEADERS (These will scroll up and hide) */
-        thead th { 
-            background: var(--bg-panel); 
-            color: white; 
-            font-weight: 700; 
-            font-size: 0.85rem; 
-            padding: 16px 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        h1, h2 { color: var(--primary); text-align: center; margin-bottom: 0.5rem; }
+        .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+        /* Today & Target Dashboard */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary);
+        }
+        .date-badge { font-weight: 600; color: var(--text-main); font-size: 1.1rem; }
+        .target-badge { font-weight: 600; color: var(--warning); background: #FEF3C7; padding: 0.5rem 1rem; border-radius: 8px; }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            min-width: 800px; 
+        }
+
+        th, td {
+            padding: 10px 8px;
+            text-align: center;
             border: 1px solid var(--border);
         }
 
-        /* STICKY TIME SLOT HEADER (Only this row sticks to the top) */
-        .sticky-header th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: var(--bg-panel); /* Opaque background so scrolling text doesn't show through */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); /* Shadow to separate it from scrolling rows */
-            border-bottom: 2px solid var(--accent); /* Blue accent line below sticky header */
+        .col-chapter {
+            text-align: left;
+            font-weight: 500;
+            min-width: 180px;
         }
 
-        /* TABLE BODY CELLS */
-        td { padding: 14px 10px; text-align: center; border: 1px solid var(--border); font-size: 0.9rem; transition: all 0.15s ease; }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            cursor: default;
+        }
         
-        .col-day { font-weight: 800; color: var(--accent); font-size: 1rem; background: rgba(0,0,0,0.2); width: 60px;}
-        .col-date { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; background: rgba(0,0,0,0.2); width: 100px;}
+        /* Hover effect for Table Headers */
+        th:hover {
+            background-color: var(--primary);
+            color: white;
+        }
         
-        .is-today { background: rgba(56, 189, 248, 0.05); }
-        .is-today .col-day, .is-today .col-date { color: white; border-top: 1px solid var(--accent); border-bottom: 1px solid var(--accent);}
+        thead { position: sticky; top: 0; z-index: 10; }
+
+        tr:hover { background-color: var(--hover-row); transition: background-color 0.2s ease; }
+
+        /* Standard Checkboxes for Tables */
+        input[type="checkbox"].table-cb {
+            appearance: none;
+            background-color: var(--surface);
+            margin: 0;
+            width: 1.4em;
+            height: 1.4em;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            display: inline-grid;
+            place-content: center;
+            cursor: pointer;
+            transition: 0.2s all ease-in-out;
+        }
+
+        input[type="checkbox"].table-cb::before {
+            content: "";
+            width: 0.7em;
+            height: 0.7em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        input[type="checkbox"].table-cb:checked { background-color: var(--success); border-color: var(--success); }
+        input[type="checkbox"].table-cb:checked::before { transform: scale(1); }
+
+        /* Flex Layout for Bottom Sections */
+        .flex-section { display: flex; gap: 2rem; flex-wrap: wrap; }
+        .flex-child { flex: 1; min-width: 320px; }
+
+        .list-group { list-style: none; padding: 0; }
+        .list-group li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
         
-        /* CLICKABLE TARGET CELLS */
-        .cell-target { cursor: pointer; color: #94a3b8; user-select: none; }
-        .cell-target:hover { background: var(--hover); color: white; }
-        .cell-done { background: var(--green) !important; color: white !important; font-weight: 700; }
+        .list-group span { font-weight: 500; }
+        .checkbox-group { display: flex; gap: 8px; }
+
+        /* Numbered Checkbox Grids */
+        .number-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-start;
+            margin-top: 1rem;
+        }
+
+        .numbered-cb-wrapper { position: relative; width: 40px; height: 40px; }
+        .numbered-cb-wrapper input { position: absolute; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 2; }
+        .numbered-cb-wrapper .box {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--border); border-radius: 8px;
+            background: var(--surface); color: var(--text-muted); font-weight: 600; font-size: 0.9rem;
+            transition: all 0.2s ease; user-select: none;
+        }
+
+        .numbered-cb-wrapper input:checked + .box { background-color: var(--success); border-color: var(--success); color: white; transform: scale(0.95); }
+        .numbered-cb-wrapper input:hover:not(:checked) + .box { border-color: var(--primary); color: var(--primary); }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%; background-color: var(--border); border-radius: 8px; margin-bottom: 2rem; height: 20px;
+            overflow: hidden; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .progress-bar { height: 100%; background-color: var(--success); width: 0%; transition: width 0.4s ease; }
+
+        /* Floating Go To Today Button */
+        .floating-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            background-color: var(--primary); color: white;
+            border: none; border-radius: 50px; padding: 12px 24px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, background-color 0.2s ease; z-index: 50;
+        }
+        .floating-btn:hover { background-color: #4338CA; transform: translateY(-2px); }
+
+        @media (max-width: 768px) {
+            .dashboard-header { flex-direction: column; gap: 10px; text-align: center; }
+        }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="index.html" class="active">📅 Daily Plan ☁️</a>
-        <a href="syllabus_tracker.html">📚 Syllabus</a>
-        <a href="mock_scores.html">📊 Mock Scores</a>
-        <a href="quiz_log.html">🧠 Quiz Log ☁️</a>
-    </nav>
+<div class="container" id="top-dashboard">
+    <h1>Ultimate Prep Dashboard</h1>
+    <div class="subtitle">Maths (6x Revision/Practice) & Reasoning Tracker</div>
 
-    <div class="challenge-header">
-        <h1 class="header-title">103 DAY CHALLENGE</h1>
-        <div class="progress-section">
-            <span id="cloudStatus" style="color: var(--accent); font-size: 0.8rem; margin-right: 15px;">⏳ Syncing...</span>
-            <span style="color: #94a3b8;">Progress: <strong id="progressText" style="color: white;">0%</strong></span>
-            <div class="progress-bar-container"><div class="progress-fill" id="progressBar"></div></div>
-        </div>
+    <div class="dashboard-header">
+        <div class="date-badge" id="current-date">Today: ...</div>
+        <div class="target-badge" id="countdown-timer">Target: May 31 - Calculating...</div>
     </div>
 
-    <div class="table-wrapper">
-        <table id="trackerTable">
+    <div class="progress-container" title="Overall Progress">
+        <div class="progress-bar" id="mainProgress"></div>
+    </div>
+
+    <div class="card">
+        <h2>Maths Progress Report</h2>
+        <table>
             <thead>
                 <tr>
-                    <th colspan="2" rowspan="2" style="background: #162032; color: var(--accent); font-size: 1.4rem; font-weight: 800; vertical-align: middle;">
-                        DAY <span id="currentDayDisplay" style="color: white;">0</span><span style="font-size: 0.9rem; color: #94a3b8;">/103</span>
-                    </th>
-                    <th colspan="3">SSC Group</th>
-                    <th colspan="2">RRB Group</th>
-                    <th>UPSI</th>
+                    <th rowspan="2" class="col-chapter">Chapter Name</th>
+                    <th rowspan="2">Lecture</th>
+                    <th colspan="6">Revision (6 Rounds)</th>
+                    <th colspan="6">Practice Qs. 25-40/day (6 Rounds)</th>
                 </tr>
                 <tr>
-                    <th style="color: #fca5a5;">RBE Daily Targets</th>
-                    <th style="color: #fcd34d;">GS PARMAR 4.0</th>
-                    <th style="color: #86efac;">ENGLISH AMAN SIR</th>
-                    <th style="color: #93c5fd;">GS</th>
-                    <th style="color: #c4b5fd;">MATH/RESONING</th>
-                    <th style="color: #fbcfe8;">Hindi</th>
-                </tr>
-                <tr class="sticky-header">
-                    <th>DAY</th>
-                    <th>DATE</th>
-                    <th>9AM - 3PM</th>
-                    <th>3.30PM - 5PM</th>
-                    <th>5PM - 6PM</th>
-                    <th>8PM - 9PM</th>
-                    <th>10PM - 12PM</th>
-                    <th>12AM - 2AM</th>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
+            <tbody id="maths-body">
                 </tbody>
         </table>
     </div>
 
-<script type="module">
-    // --- FIREBASE CLOUD SETUP ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    <div class="card">
+        <h2>Reasoning Progress Report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-chapter">Chapter Name</th>
+                    <th>Lecture</th>
+                    <th>Practice</th>
+                </tr>
+            </thead>
+            <tbody id="reasoning-body">
+                </tbody>
+        </table>
+    </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVAXOdqKnBgFKSe3tKn0omfeib4AdfzVU",
-      authDomain: "ssc-command-center-285cd.firebaseapp.com",
-      projectId: "ssc-command-center-285cd",
-      storageBucket: "ssc-command-center-285cd.firebasestorage.app",
-      messagingSenderId: "512383276315",
-      appId: "1:512383276315:web:95da05a6a05d3efb48efbe",
-      measurementId: "G-G3DWYBB80L"
-    };
+    <div class="flex-section">
+        <div class="card flex-child" style="flex: 0.5;">
+            <h2>Needs Multiple Revision</h2>
+            <ul class="list-group" id="multiple-rev-list">
+                </ul>
+        </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        <div class="card flex-child">
+            <h2>Reasoning Speed Booster (30)</h2>
+            <div class="number-grid" id="speed-booster">
+                </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Reasoning Sectional Mocks (60)</h2>
+        <div class="number-grid" id="sectional-mocks">
+            </div>
+    </div>
+
+</div>
+
+<button class="floating-btn" onclick="document.getElementById('top-dashboard').scrollIntoView({behavior: 'smooth'})">Go to Today ⬆</button>
+
+<script>
+    // --- DATE & COUNTDOWN LOGIC ---
+    function updateDashboard() {
+        const today = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = "Today: " + today.toLocaleDateString('en-US', options);
+
+        const targetDate = new Date(today.getFullYear(), 4, 31); // Month is 0-indexed (4 = May)
+        if (today > targetDate) targetDate.setFullYear(targetDate.getFullYear() + 1); // Push to next year if passed
+        
+        const diffTime = Math.abs(targetDate - today);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        document.getElementById('countdown-timer').textContent = `Target: May 31 — ${diffDays} days left`;
+    }
 
     // --- TABLE GENERATION ---
-    const TOTAL_DAYS = 103; 
-    const START_DATE = new Date('2026-02-18T00:00:00'); 
-    
-    function generateTable() {
-        const tbody = document.getElementById('tableBody');
-        let html = '';
-        let activeDayNumber = "0"; 
+    const mathsChapters = [
+        "Percentage", "Profit & Loss", "Discount", "Simple Interest", "Compound Interest", 
+        "SI Installment", "CI Installment", "Ratio & Proportion", "Partnership", "Time & Work", 
+        "Pipe & Cistern", "Mixture Alligation", "Average", "Work & Wages", "Time Speed Distance", 
+        "Boat & Stream", "Race", "LCM HCF", "Mensuration 2D", "Mensuration 3D", "Polygon", 
+        "Sequence & Series", "Number System", "Height & Distance", "Trigonometry", "Geometry", 
+        "Coordinate Geometry", "Algebra", "Simplification", "DI"
+    ];
 
-        const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    const reasoningChapters = [
+        "Statement - Conclusion", "Decision Making", "Machine Input-Output", "Statement - Argument", 
+        "Statement - Assumptions", "Syllogism", "Data Sufficiency", "Course of Action", "Inequalities", 
+        "Cause - Effect", "Order - Ranking", "Blood Relation", "Figure Series", "Mathematical Operations", 
+        "Paper Unfolding/Cutting", "Dice", "Word Arrangement", "Direction", "Venn Diagram", 
+        "Seating Arrangement", "Number Series", "Alphabetical Series", "Coding-Decoding", 
+        "Analogy", "Odd One Out", "Floor Arrangement"
+    ];
 
-        for (let i = 1; i <= TOTAL_DAYS; i++) {
-            const d = new Date(START_DATE);
-            d.setDate(START_DATE.getDate() + (i - 1));
-            
-            const dd = String(d.getDate()).padStart(2, '0');
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const yyyy = d.getFullYear();
-            const dateStr = `${dd}-${mm}-${yyyy}`;
+    function createMathsRows() {
+        const tbody = document.getElementById('maths-body');
+        mathsChapters.forEach((chapter, index) => {
+            let tr = document.createElement('tr');
+            let tdName = document.createElement('td');
+            tdName.className = 'col-chapter';
+            tdName.textContent = chapter;
+            tr.appendChild(tdName);
 
-            const isToday = (dateStr === todayStr);
-            const rowClass = isToday ? 'is-today' : '';
-            const rowId = isToday ? 'todayRow' : `row-${i}`;
-
-            if (isToday) activeDayNumber = i;
-
-            // Helper function to create clickable cells
-            const createCell = (slotNum, text) => `
-                <td class="cell-target" id="d${i}-s${slotNum}" onclick="window.toggleCell('d${i}-s${slotNum}', this)">
-                    ${text}
-                </td>
-            `;
-
-            html += `
-                <tr class="${rowClass}" id="${rowId}">
-                    <td class="col-day">${i}</td>
-                    <td class="col-date">${dateStr}</td>
-                    ${createCell(1, `RBE Daily targets`)}
-                    ${createCell(2, `Polity - ${i}`)}
-                    ${createCell(3, `Lecture - ${i}`)}
-                    ${createCell(4, `PARMAR PYQ - ${i}`)}
-                    ${createCell(5, i % 7 === 0 ? `FULL MOCK - ${i/7}` : `MATH/REASONING`)}
-                    ${createCell(6, `Lecture till-${i * 3}`)}
-                </tr>
-            `;
-        }
-
-        tbody.innerHTML = html;
-        document.getElementById('currentDayDisplay').innerText = activeDayNumber;
-        
-        // Auto-scroll to today
-        setTimeout(() => {
-            const row = document.getElementById('todayRow');
-            if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 500);
-    }
-
-    // --- CELL TOGGLE & CLOUD SYNC LOGIC ---
-    window.toggleCell = async (id, tdElement) => {
-        const isCompleted = tdElement.classList.toggle('cell-done');
-        window.updateProgressBar();
-
-        document.getElementById('cloudStatus').innerText = "☁️ Saving...";
-        try {
-            await setDoc(doc(db, "ssc_daily_plan", "progress_v3"), {
-                [id]: isCompleted
-            }, { merge: true });
-            document.getElementById('cloudStatus').innerText = "☁️ Synced";
-        } catch(e) {
-            console.error("Firebase Sync Error", e);
-            document.getElementById('cloudStatus').innerText = "❌ Sync Error";
-            tdElement.classList.toggle('cell-done');
-            window.updateProgressBar();
-        }
-    };
-
-    // --- PROGRESS BAR ---
-    window.updateProgressBar = () => {
-        const total = document.querySelectorAll('.cell-target').length;
-        const completed = document.querySelectorAll('.cell-done').length;
-        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-        
-        document.getElementById('progressBar').style.width = percentage + '%';
-        document.getElementById('progressText').innerText = percentage + '%';
-    };
-
-    // --- LOAD CLOUD DATA ON STARTUP ---
-    async function loadCloudProgress() {
-        try {
-            const docSnap = await getDoc(doc(db, "ssc_daily_plan", "progress_v3"));
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                for (const [id, isCompleted] of Object.entries(data)) {
-                    if (isCompleted) {
-                        const cell = document.getElementById(id);
-                        if (cell) cell.classList.add('cell-done');
-                    }
-                }
-                window.updateProgressBar();
+            for (let i = 0; i < 13; i++) {
+                let td = document.createElement('td');
+                let cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'table-cb';
+                cb.id = `math-${index}-${i}`;
+                cb.addEventListener('change', saveProgress);
+                td.appendChild(cb);
+                tr.appendChild(td);
             }
-            document.getElementById('cloudStatus').innerText = "☁️ Synced";
-        } catch(e) {
-            console.error("Error loading cloud data", e);
-            document.getElementById('cloudStatus').innerText = "❌ Offline";
+            tbody.appendChild(tr);
+        });
+    }
+
+    function createReasoningRows() {
+        const tbody = document.getElementById('reasoning-body');
+        reasoningChapters.forEach((chapter, index) => {
+            let tr = document.createElement('tr');
+            let tdName = document.createElement('td');
+            tdName.className = 'col-chapter';
+            tdName.textContent = chapter;
+            tr.appendChild(tdName);
+
+            for (let i = 0; i < 2; i++) {
+                let td = document.createElement('td');
+                let cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'table-cb';
+                cb.id = `reas-${index}-${i}`;
+                cb.addEventListener('change', saveProgress);
+                td.appendChild(cb);
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        });
+    }
+
+    function createMultipleRevision() {
+        const topics = [ { id: 'cal', name: 'Calendar' }, { id: 'clk', name: 'Clock' }, { id: 'fig', name: 'Figure Counting' } ];
+        const container = document.getElementById('multiple-rev-list');
+        
+        topics.forEach(topic => {
+            let li = document.createElement('li');
+            let span = document.createElement('span'); span.textContent = topic.name;
+            let cbGroup = document.createElement('div'); cbGroup.className = 'checkbox-group';
+            
+            for (let i = 1; i <= 5; i++) {
+                let cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'table-cb';
+                cb.id = `multirev-${topic.id}-${i}`; cb.addEventListener('change', saveProgress);
+                cbGroup.appendChild(cb);
+            }
+            li.appendChild(span); li.appendChild(cbGroup); container.appendChild(li);
+        });
+    }
+
+    function createNumberedGrid(containerId, count, prefix) {
+        const grid = document.getElementById(containerId);
+        for (let i = 1; i <= count; i++) {
+            let wrapper = document.createElement('label'); wrapper.className = 'numbered-cb-wrapper';
+            let cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = `${prefix}-${i}`; cb.addEventListener('change', saveProgress);
+            let box = document.createElement('div'); box.className = 'box'; box.textContent = i;
+            wrapper.appendChild(cb); wrapper.appendChild(box); grid.appendChild(wrapper);
         }
     }
 
-    // Initialize the Application
-    generateTable();
-    loadCloudProgress();
+    function saveProgress() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        let state = {}; let checkedCount = 0;
+        checkboxes.forEach(cb => { state[cb.id] = cb.checked; if (cb.checked) checkedCount++; });
+        localStorage.setItem('studyProgressV3', JSON.stringify(state));
+        document.getElementById('mainProgress').style.width = `${(checkedCount / checkboxes.length) * 100}%`;
+    }
+
+    function loadProgress() {
+        const saved = localStorage.getItem('studyProgressV3') || localStorage.getItem('studyProgressV2'); // Fallback to older data if V3 is empty
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        let checkedCount = 0;
+        if (saved) {
+            const state = JSON.parse(saved);
+            checkboxes.forEach(cb => { if (state[cb.id]) { cb.checked = true; checkedCount++; } });
+        }
+        document.getElementById('mainProgress').style.width = `${(checkedCount / checkboxes.length) * 100}%`;
+    }
+
+    // Initialize Everything
+    updateDashboard();
+    createMathsRows();
+    createReasoningRows();
+    createMultipleRevision();
+    createNumberedGrid('speed-booster', 30, 'speed');
+    createNumberedGrid('sectional-mocks', 60, 'mock');
+    loadProgress();
 
 </script>
 </body>
