@@ -1,262 +1,2852 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>103 Day Challenge - SSC CGL</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Universal Exam Pro Analytics</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        :root {
-            --bg-main: #0f172a;       
-            --bg-panel: #1e293b;      
-            --border: #334155;        
-            --text-main: #cbd5e1;     
-            --text-muted: #64748b;    
-            --accent: #38bdf8;        
-            --green: #10b981;         
-            --hover: rgba(255, 255, 255, 0.05);
+      :root {
+        --bg: #0f172a;
+        --card-base: 30, 41, 59;
+        --card-opacity: 1;
+        --card: rgba(var(--card-base), var(--card-opacity));
+        --border: #334155;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --green: #10b981;
+        --red: #ef4444;
+        --yellow: #f59e0b;
+        --purple: #a855f7;
+      }
+      [data-theme="light"] {
+        --bg: #f8fafc;
+        --card-base: 255, 255, 255;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --muted: #64748b;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      /* --- TOP HEADER BAR --- */
+      .top-bar {
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        transition:
+          background 0.3s,
+          border 0.3s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      .top-bar-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+      .top-bar select {
+        width: auto;
+        padding: 8px 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .top-bar-status {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 0.95rem;
+        background: var(--bg);
+        padding: 8px 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .theme-btn {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+        transition: transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .theme-btn:hover {
+        transform: scale(1.15);
+      }
+
+      @media (max-width: 600px) {
+        .top-bar {
+          flex-direction: column;
+          gap: 15px;
+          padding: 15px;
         }
-
-        body { background: var(--bg-main); color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* TOP NAVIGATION */
-        nav { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 12px; display: flex; gap: 20px; justify-content: center; z-index: 100; flex-shrink: 0; }
-        nav a { color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 6px 12px; border-radius: 6px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-        nav a:hover { background: var(--border); color: white; }
-        nav a.active { background: rgba(255,255,255,0.1); color: white; }
-
-        /* HEADER SECTION */
-        .challenge-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .header-title { margin: 0; color: var(--accent); font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
-        .progress-section { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; font-weight: 600; }
-        .progress-bar-container { width: 200px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.3s ease; }
-
-        /* TABLE CONTAINER (Scrollable Area) */
-        .table-wrapper { flex: 1; overflow: auto; padding: 0 30px 30px 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: -1px; }
-        
-        /* NORMAL TABLE HEADERS (These will scroll up and hide) */
-        thead th { 
-            background: var(--bg-panel); 
-            color: white; 
-            font-weight: 700; 
-            font-size: 0.85rem; 
-            padding: 16px 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border: 1px solid var(--border);
+        .top-bar-controls {
+          flex-wrap: wrap;
+          justify-content: center;
         }
+      }
 
-        /* STICKY TIME SLOT HEADER (Only this row sticks to the top) */
-        .sticky-header th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: var(--bg-panel); /* Opaque background so scrolling text doesn't show through */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); /* Shadow to separate it from scrolling rows */
-            border-bottom: 2px solid var(--accent); /* Blue accent line below sticky header */
+      /* LAYOUT */
+      .container {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 20px;
+      }
+      @media (max-width: 1100px) {
+        .container {
+          grid-template-columns: 1fr;
         }
+      }
 
-        /* TABLE BODY CELLS */
-        td { padding: 14px 10px; text-align: center; border: 1px solid var(--border); font-size: 0.9rem; transition: all 0.15s ease; }
-        
-        .col-day { font-weight: 800; color: var(--accent); font-size: 1rem; background: rgba(0,0,0,0.2); width: 60px;}
-        .col-date { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; background: rgba(0,0,0,0.2); width: 100px;}
-        
-        .is-today { background: rgba(56, 189, 248, 0.05); }
-        .is-today .col-day, .is-today .col-date { color: white; border-top: 1px solid var(--accent); border-bottom: 1px solid var(--accent);}
-        
-        /* CLICKABLE TARGET CELLS */
-        .cell-target { cursor: pointer; color: #94a3b8; user-select: none; }
-        .cell-target:hover { background: var(--hover); color: white; }
-        .cell-done { background: var(--green) !important; color: white !important; font-weight: 700; }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: 0.3s;
+      }
+      h2 {
+        margin-top: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
+        font-size: 1.1rem;
+        color: var(--text);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .dash-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card);
+        padding: 15px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .stat-box {
+        background: rgba(15, 23, 42, 0.05);
+        padding: 12px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        text-align: center;
+      }
+      [data-theme="dark"] .stat-box {
+        background: rgba(15, 23, 42, 0.3);
+      }
+      .stat-val {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .stat-lbl {
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 5px;
+      }
+
+      /* Dynamic Sectional Grids */
+      .sec-stat-box {
+        background: rgba(15, 23, 42, 0.05);
+        border: 1px solid var(--border);
+        border-top: 3px solid;
+        border-radius: 8px;
+        padding: 15px 10px;
+        text-align: center;
+        min-width: 120px;
+      }
+      [data-theme="dark"] .sec-stat-box {
+        background: rgba(15, 23, 42, 0.3);
+      }
+      .sec-title {
+        font-weight: 800;
+        margin-bottom: 12px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .sec-scores {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+      .sec-scores > div {
+        display: flex;
+        flex-direction: column;
+      }
+      .sec-val {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: var(--text);
+      }
+      .sec-lbl {
+        font-size: 0.65rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 4px;
+      }
+
+      .input-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 5px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        box-sizing: border-box;
+        transition: 0.3s;
+      }
+      input:focus,
+      select:focus {
+        outline: 1px solid var(--accent);
+      }
+
+      .score-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+        font-size: 0.85rem;
+      }
+      .score-table th {
+        color: var(--muted);
+        font-weight: 600;
+        text-align: center;
+        padding-bottom: 8px;
+      }
+      .score-table td {
+        padding: 4px;
+      }
+      .score-table input {
+        text-align: center;
+        padding: 8px;
+        font-weight: bold;
+      }
+      .row-lbl {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .qualifying-badge {
+        font-size: 0.6rem;
+        background: var(--border);
+        padding: 2px 5px;
+        border-radius: 4px;
+        margin-left: 5px;
+        color: var(--muted);
+        vertical-align: middle;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+      }
+      .btn-cancel {
+        background: var(--border);
+        color: var(--text);
+      }
+
+      .action-row {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        margin-bottom: 25px;
+      }
+      .action-row .live-score {
+        flex: 1;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--green);
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 6px;
+        border: 1px dashed var(--green);
+        flex-direction: column;
+        line-height: 1.2;
+        padding: 5px;
+      }
+      .action-row .btn {
+        flex: 1;
+        width: auto;
+      }
+
+      .chart-wrapper {
+        position: relative;
+        height: 280px;
+        width: 100%;
+      }
+      .dual-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      /* RESTORED TIME VISUALS */
+      .time-numeric-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+      }
+      .time-badge {
+        background: rgba(15, 23, 42, 0.05);
+        border: 1px solid var(--border);
+        padding: 15px 10px;
+        border-radius: 8px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      [data-theme="dark"] .time-badge {
+        background: rgba(15, 23, 42, 0.3);
+      }
+      .time-badge span {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+      }
+      .time-val-text {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-top: 2px;
+      }
+
+      /* RESTORED ACCURACY VISUALS */
+      .acc-skip-row {
+        margin-bottom: 15px;
+      }
+      .as-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .as-stats {
+        font-size: 0.8rem;
+        color: var(--muted);
+        display: flex;
+        gap: 12px;
+        font-weight: normal;
+      }
+      .as-stats strong {
+        color: var(--text);
+      }
+      .progress-bg {
+        background: rgba(15, 23, 42, 0.1);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        height: 8px;
+        width: 100%;
+        overflow: hidden;
+      }
+      [data-theme="dark"] .progress-bg {
+        background: rgba(15, 23, 42, 0.6);
+      }
+      .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.6s ease;
+      }
+
+      .hist-item {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .hist-item:last-child {
+        border: none;
+      }
+
+      /* AI UPLOAD BOX */
+      .ai-upload-box {
+        background: linear-gradient(
+          145deg,
+          rgba(56, 189, 248, 0.05),
+          rgba(168, 85, 247, 0.05)
+        );
+        border: 1px dashed var(--accent);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        transition: 0.3s;
+      }
+      [data-theme="dark"] .ai-upload-box {
+        background: linear-gradient(
+          145deg,
+          rgba(56, 189, 248, 0.1),
+          rgba(168, 85, 247, 0.1)
+        );
+      }
+      .ai-upload-box:hover {
+        border-style: solid;
+      }
+      .ai-btn {
+        background: linear-gradient(90deg, var(--accent), var(--purple));
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-block;
+      }
+
+      /* CONFIG & SETTINGS MENU */
+      .settings-group {
+        background: rgba(15, 23, 42, 0.05);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      [data-theme="dark"] .settings-group {
+        background: rgba(15, 23, 42, 0.3);
+      }
+      .settings-header {
+        padding: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        color: var(--text);
+        font-size: 0.9rem;
+      }
+      .settings-header::-webkit-details-marker {
+        display: none;
+      }
+      .settings-content {
+        padding: 15px;
+        border-top: 1px solid var(--border);
+      }
+      .cfg-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        margin-top: 10px;
+      }
+      .cfg-table th {
+        text-align: left;
+        padding: 5px;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+      }
+      .cfg-table td {
+        padding: 8px 5px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* MODAL STYLES */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      [data-theme="light"] .modal-overlay {
+        background: rgba(255, 255, 255, 0.85);
+      }
+      .modal-content {
+        background: var(--card);
+        padding: 30px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 1000px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      }
+      .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 25px;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--muted);
+        transition: 0.2s;
+      }
+      .modal-close:hover {
+        color: var(--text);
+      }
+      .modal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+      .speedometer-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .action-btns-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .btn-sm {
+        padding: 8px;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--accent);
+        cursor: pointer;
+        transition: 0.2s;
+        font-weight: 600;
+      }
+      .btn-sm:hover {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+
+      #sectionalWarning {
+        padding: 40px;
+        text-align: center;
+        color: var(--muted);
+        background: var(--bg);
+        border-radius: 8px;
+        border: 1px dashed var(--border);
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+
+      .form-toggle-header:hover {
+        color: var(--accent) !important;
+      }
     </style>
-</head>
-<body>
-
-    <nav>
-        <a href="index.html" class="active">📅 Daily Plan ☁️</a>
-        <a href="syllabus_tracker.html">📚 Syllabus</a>
-        <a href="mock_scores.html">📊 Mock Scores</a>
-        <a href="quiz_log.html">🧠 Quiz Log ☁️</a>
-    </nav>
-
-    <div class="challenge-header">
-        <h1 class="header-title">103 DAY CHALLENGE</h1>
-        <div class="progress-section">
-            <span id="cloudStatus" style="color: var(--accent); font-size: 0.8rem; margin-right: 15px;">⏳ Syncing...</span>
-            <span style="color: #94a3b8;">Progress: <strong id="progressText" style="color: white;">0%</strong></span>
-            <div class="progress-bar-container"><div class="progress-fill" id="progressBar"></div></div>
+  </head>
+  <body>
+    <header class="top-bar">
+      <div class="top-bar-controls">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="font-size: 1.6rem">🎯</span>
+          <div style="display: flex; flex-direction: column">
+            <label
+              style="
+                color: var(--muted);
+                font-size: 0.65rem;
+                font-weight: bold;
+                margin-bottom: 2px;
+                text-transform: uppercase;
+              "
+              >Exam</label
+            >
+            <select
+              id="globalFilterExam"
+              onchange="
+                updateGlobalTierFilter();
+                updateDashboard();
+              "
+            ></select>
+          </div>
+          <div style="display: flex; flex-direction: column">
+            <label
+              style="
+                color: var(--muted);
+                font-size: 0.65rem;
+                font-weight: bold;
+                margin-bottom: 2px;
+                text-transform: uppercase;
+              "
+              >Tier</label
+            >
+            <select
+              id="globalFilterTier"
+              onchange="
+                buildFormTable();
+                updateDashboard();
+              "
+            ></select>
+          </div>
+          <button
+            class="theme-btn"
+            id="themeToggleBtn"
+            onclick="toggleTheme()"
+            title="Toggle Theme"
+            style="margin-top: 10px"
+          >
+            🌞
+          </button>
         </div>
+      </div>
+      <div class="top-bar-status" id="activeExamDisplay">
+        Current: SSC CGL - Pre
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="main-content">
+        <div class="dash-header">
+          <div
+            style="
+              font-size: 1.2rem;
+              font-weight: bold;
+              color: var(--text);
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            "
+          >
+            Performance Overview
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 15px;
+              flex-wrap: wrap;
+              align-items: center;
+            "
+          >
+            <div class="filter-group">
+              <label
+                style="color: var(--muted); font-size: 0.9rem; font-weight: 600"
+                >Provider Filter:</label
+              >
+              <select
+                id="filterProv"
+                onchange="updateDashboard()"
+                style="width: 150px; padding: 6px; font-size: 0.85rem"
+              ></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="st-total" style="color: var(--text)">
+              0
+            </div>
+            <div class="stat-lbl">Total Mocks</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="st-avg">0</div>
+            <div class="stat-lbl">Overall Avg</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: var(--green)" id="st-recent">
+              0
+            </div>
+            <div class="stat-lbl">Last 5 Avg</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: var(--yellow)" id="st-acc">
+              0%
+            </div>
+            <div class="stat-lbl">Avg Accuracy</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: var(--purple)" id="st-perc">
+              0%
+            </div>
+            <div class="stat-lbl">Avg Percentile</div>
+          </div>
+        </div>
+
+        <div id="sectionalWarning" style="display: none">
+          ⚠️ Please select a specific <b>Exam</b> and <b>Tier</b> from the top
+          header to view detailed Sectional Analytics.
+        </div>
+
+        <div id="dynamicSectionalData">
+          <div class="card">
+            <h2>Sectional Average Scores</h2>
+            <div
+              id="saGrid"
+              style="
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: minmax(130px, 1fr);
+                gap: 12px;
+                overflow-x: auto;
+                padding-bottom: 5px;
+              "
+            ></div>
+          </div>
+
+          <div class="dual-grid">
+            <div class="card">
+              <h2>Avg Time Allocation (Mins)</h2>
+              <div class="time-numeric-grid" id="timeGrid"></div>
+            </div>
+
+            <div class="card">
+              <h2>🎯 Sectional Accuracy & Skip Rate</h2>
+              <div
+                style="display: flex; flex-direction: column; margin-top: 15px"
+                id="accSkipContainer"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 style="align-items: center">
+            Overall Score Trend
+            <div class="filter-group" style="margin: 0; gap: 8px">
+              <label style="font-size: 0.85rem; margin: 0; color: var(--muted)"
+                >Target Score:</label
+              >
+              <input
+                type="number"
+                id="globalTargetInp"
+                onchange="updateGlobalTarget()"
+                style="
+                  width: 70px;
+                  padding: 6px;
+                  font-size: 0.85rem;
+                  border-radius: 6px;
+                "
+                title="Set your ultimate goal for this specific exam tier"
+              />
+            </div>
+          </h2>
+          <div class="chart-wrapper"><canvas id="mainChart"></canvas></div>
+        </div>
+
+        <div class="card" id="sectionChartCard">
+          <h2>Sectional Performance Trend</h2>
+          <div class="chart-wrapper"><canvas id="sectionChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="card" style="position: static; top: 20px">
+          <h2
+            onclick="toggleForm()"
+            class="form-toggle-header"
+            style="cursor: pointer; transition: 0.2s; user-select: none"
+          >
+            Add Mock Data
+            <span id="formIcon" style="font-size: 0.9rem; transition: 0.3s"
+              >▼</span
+            >
+          </h2>
+
+          <div id="scoreFormWrapper">
+            <form id="scoreForm">
+              <div
+                class="input-grid"
+                style="grid-template-columns: 1fr 1fr 1fr"
+              >
+                <div class="form-group">
+                  <label>Date</label><input type="date" id="mDate" required />
+                </div>
+                <div class="form-group">
+                  <label>Provider</label
+                  ><select
+                    id="mProv"
+                    onchange="checkAddProvider(this)"
+                  ></select>
+                </div>
+                <div class="form-group">
+                  <label>Level</label>
+                  <select id="mLevel">
+                    <option value="Easy">Easy</option>
+                    <option value="Moderate" selected>Moderate</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+
+              <div
+                class="input-grid"
+                style="grid-template-columns: 2fr 1fr 1fr"
+              >
+                <div class="form-group">
+                  <label>Mock Name</label
+                  ><input
+                    type="text"
+                    id="mName"
+                    placeholder="e.g. Test 1"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Percentile</label
+                  ><input
+                    type="number"
+                    id="mPerc"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    placeholder="95.5"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Cut-off</label
+                  ><input type="number" id="mCutoff" placeholder="150" />
+                </div>
+              </div>
+
+              <table class="score-table">
+                <thead>
+                  <tr>
+                    <th style="text-align: left">Subject</th>
+                    <th>Correct</th>
+                    <th>Wrong</th>
+                    <th>Time (m)</th>
+                  </tr>
+                </thead>
+                <tbody id="formTableBody" oninput="liveCalculate()"></tbody>
+              </table>
+
+              <div class="action-row">
+                <div class="live-score" id="liveScore">
+                  <span id="lsMain" style="font-size: 1.2rem">Total: 0</span>
+                  <span
+                    id="lsQual"
+                    style="
+                      font-size: 0.75rem;
+                      color: var(--muted);
+                      display: none;
+                      font-weight: normal;
+                      margin-top: 3px;
+                    "
+                    >Qualifying: 0</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-cancel"
+                  id="cancelEditBtn"
+                  style="display: none"
+                  onclick="cancelEdit()"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn" id="submitBtn">
+                  Save Analytics
+                </button>
+              </div>
+            </form>
+
+            <div class="ai-upload-box">
+              <label for="aiScreenshot" style="cursor: pointer; display: block">
+                <div class="ai-btn">✨ Auto-Fill with Gemini AI</div>
+                <div
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--muted);
+                    margin-top: 5px;
+                    margin-bottom: 8px;
+                  "
+                >
+                  Upload screenshot of mock analysis
+                </div>
+              </label>
+              <input
+                type="file"
+                id="aiScreenshot"
+                accept="image/*"
+                style="display: none"
+                onchange="handleScreenshotUpload(event)"
+              />
+
+              <div
+                id="aiLoading"
+                style="
+                  display: none;
+                  color: var(--accent);
+                  font-size: 0.85rem;
+                  margin-top: 10px;
+                  font-weight: 600;
+                "
+              >
+                ⏳ Extracting data... Please wait.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px">
+          <h2>History</h2>
+          <div
+            id="historyList"
+            style="max-height: 400px; overflow-y: auto"
+          ></div>
+
+          <div
+            style="
+              margin-top: 15px;
+              border-top: 1px solid var(--border);
+              padding-top: 15px;
+            "
+          >
+            <h3
+              style="font-size: 0.9rem; color: var(--muted); margin: 0 0 10px 0"
+            >
+              Data Backup
+            </h3>
+            <div class="action-btns-grid">
+              <button class="btn-sm" onclick="exportJSON()">
+                ⬇️ Export Backup
+              </button>
+              <button
+                class="btn-sm"
+                onclick="document.getElementById('importJson').click()"
+              >
+                ⬆️ Import Backup
+              </button>
+            </div>
+            <input
+              type="file"
+              id="importJson"
+              accept=".json"
+              style="display: none"
+              onchange="importJSON(event)"
+            />
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px; padding: 10px 20px">
+          <h2
+            style="cursor: pointer; border: none; padding: 0; margin: 10px 0"
+            onclick="toggleSettings()"
+          >
+            ⚙️ Settings & Setup
+            <span id="settingsIcon" style="font-size: 0.9rem">▼</span>
+          </h2>
+
+          <div id="settingsContainer" style="display: none; margin-top: 15px">
+            <details class="settings-group">
+              <summary class="settings-header">🔑 Gemini API Key</summary>
+              <div class="settings-content">
+                <div
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--muted);
+                    margin-bottom: 10px;
+                  "
+                >
+                  Store your Gemini API key locally to use the Auto-Fill
+                  feature.
+                </div>
+                <input
+                  type="password"
+                  id="geminiApiKey"
+                  placeholder="Enter API Key here..."
+                  style="font-size: 0.8rem; padding: 8px; width: 100%"
+                  title="Your key is stored locally."
+                  onchange="saveApiKey(this.value)"
+                />
+              </div>
+            </details>
+
+            <details class="settings-group">
+              <summary class="settings-header">🎨 Theme Customization</summary>
+              <div class="settings-content">
+                <div
+                  class="input-grid"
+                  style="grid-template-columns: 1fr 1fr; align-items: center"
+                >
+                  <div>
+                    <label>Accent Color</label>
+                    <input
+                      type="color"
+                      id="themeAccent"
+                      value="#38bdf8"
+                      style="padding: 2px; height: 35px; cursor: pointer"
+                      onchange="applyCustomTheme()"
+                    />
+                  </div>
+                  <div>
+                    <label>Card Transparency</label>
+                    <input
+                      type="range"
+                      id="themeOpacity"
+                      min="0.1"
+                      max="1"
+                      step="0.1"
+                      value="1"
+                      style="width: 100%; cursor: pointer"
+                      onchange="applyCustomTheme()"
+                    />
+                  </div>
+                </div>
+                <button
+                  class="btn-sm"
+                  style="width: 100%; margin-top: 10px; color: var(--text)"
+                  onclick="resetTheme()"
+                >
+                  Reset to Default
+                </button>
+              </div>
+            </details>
+
+            <details class="settings-group">
+              <summary class="settings-header">
+                📚 Manage Exam Structure
+              </summary>
+              <div class="settings-content">
+                <div
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--muted);
+                    margin-bottom: 15px;
+                    line-height: 1.4;
+                  "
+                >
+                  Build custom exams below. Example: For RRB NTPC with no
+                  sections, create 1 section named "Overall Test".
+                </div>
+
+                <div
+                  style="
+                    background: var(--bg);
+                    padding: 15px;
+                    border-radius: 8px;
+                    border: 1px dashed var(--border);
+                    margin-bottom: 15px;
+                  "
+                >
+                  <h3
+                    style="
+                      font-size: 0.85rem;
+                      margin-top: 0;
+                      color: var(--text);
+                    "
+                  >
+                    1. Create New Exam Draft
+                  </h3>
+                  <div
+                    class="input-grid"
+                    style="grid-template-columns: 1fr 1fr"
+                  >
+                    <input
+                      type="text"
+                      id="draftExamName"
+                      placeholder="Exam Name (e.g. RRB NTPC)"
+                    />
+                    <input
+                      type="text"
+                      id="draftTierName"
+                      placeholder="Tier Name (e.g. CBT 1)"
+                    />
+                  </div>
+
+                  <h3
+                    style="
+                      font-size: 0.85rem;
+                      margin-top: 15px;
+                      color: var(--text);
+                    "
+                  >
+                    2. Add Sections to Draft
+                  </h3>
+                  <div
+                    class="input-grid"
+                    style="grid-template-columns: 2fr 1fr 1fr 1fr"
+                  >
+                    <input
+                      type="text"
+                      id="draftSecName"
+                      placeholder="Sec Name (e.g. Maths)"
+                    />
+                    <input type="number" id="draftSecQs" placeholder="Qs" />
+                    <input
+                      type="number"
+                      id="draftSecPos"
+                      step="0.01"
+                      placeholder="+ Mark"
+                    />
+                    <input
+                      type="number"
+                      id="draftSecNeg"
+                      step="0.01"
+                      placeholder="Neg (e.g. 0.5)"
+                    />
+                  </div>
+                  <div
+                    class="input-grid"
+                    style="grid-template-columns: 1fr 1fr auto"
+                  >
+                    <select id="draftSecType" onchange="toggleDraftQual()">
+                      <option value="main">Main (Counts to Total)</option>
+                      <option value="qualifying">Qualifying Only</option>
+                    </select>
+                    <input
+                      type="number"
+                      id="draftSecQualMarks"
+                      step="0.01"
+                      placeholder="Min Qual Marks"
+                      style="display: none"
+                    />
+                    <button
+                      class="btn-sm"
+                      style="
+                        background: var(--accent);
+                        color: #fff;
+                        border: none;
+                      "
+                      onclick="addDraftSection()"
+                    >
+                      + Add Section
+                    </button>
+                  </div>
+
+                  <div
+                    id="draftSectionsList"
+                    style="margin-top: 15px; min-height: 20px"
+                  ></div>
+
+                  <button
+                    class="btn"
+                    style="margin-top: 15px; padding: 8px"
+                    onclick="saveDraftExam()"
+                  >
+                    💾 Save Full Exam
+                  </button>
+                </div>
+
+                <div
+                  style="border-top: 1px solid var(--border); padding-top: 15px"
+                >
+                  <h3
+                    style="font-size: 0.85rem; margin-top: 0; color: var(--red)"
+                  >
+                    Delete Exam / Tier
+                  </h3>
+                  <div
+                    class="input-grid"
+                    style="grid-template-columns: 1fr 1fr auto"
+                  >
+                    <select
+                      id="delExamSelect"
+                      onchange="populateDeleteTierDropdown()"
+                    ></select>
+                    <select id="delTierSelect"></select>
+                    <button
+                      class="btn-sm"
+                      style="background: var(--red); color: #fff; border: none"
+                      onclick="deleteExamOrTier()"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="table-wrapper">
-        <table id="trackerTable">
-            <thead>
-                <tr>
-                    <th colspan="2" rowspan="2" style="background: #162032; color: var(--accent); font-size: 1.4rem; font-weight: 800; vertical-align: middle;">
-                        DAY <span id="currentDayDisplay" style="color: white;">0</span><span style="font-size: 0.9rem; color: #94a3b8;">/103</span>
-                    </th>
-                    <th colspan="3">SSC Group</th>
-                    <th colspan="2">RRB Group</th>
-                    <th>UPSI</th>
-                </tr>
-                <tr>
-                    <th style="color: #fca5a5;">RBE Daily Targets</th>
-                    <th style="color: #fcd34d;">GS PARMAR 4.0</th>
-                    <th style="color: #86efac;">ENGLISH AMAN SIR</th>
-                    <th style="color: #93c5fd;">GS</th>
-                    <th style="color: #c4b5fd;">MATH/RESONING</th>
-                    <th style="color: #fbcfe8;">Hindi</th>
-                </tr>
-                <tr class="sticky-header">
-                    <th>DAY</th>
-                    <th>DATE</th>
-                    <th>9AM - 3PM</th>
-                    <th>3.30PM - 5PM</th>
-                    <th>5PM - 6PM</th>
-                    <th>8PM - 9PM</th>
-                    <th>10PM - 12PM</th>
-                    <th>12AM - 2AM</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                </tbody>
-        </table>
+    <div
+      id="analysisModal"
+      class="modal-overlay"
+      onclick="if (event.target === this) closeAnalysisModal();"
+    >
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeAnalysisModal()">&times;</span>
+        <h2
+          id="modNameTitle"
+          style="
+            border-bottom: none;
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+            color: var(--accent);
+          "
+        >
+          Mock Name
+        </h2>
+        <div
+          style="
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+          "
+          id="modSubTitle"
+        ></div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+          "
+          id="modStatsBg"
+        >
+          <div style="text-align: center">
+            <div
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                text-transform: uppercase;
+              "
+            >
+              Total Score
+            </div>
+            <div
+              style="font-size: 1.8rem; font-weight: 800; color: var(--text)"
+              id="modTotalScore"
+            >
+              0
+            </div>
+          </div>
+          <div style="text-align: center">
+            <div
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                text-transform: uppercase;
+              "
+            >
+              Accuracy
+            </div>
+            <div
+              style="font-size: 1.8rem; font-weight: 800; color: var(--yellow)"
+              id="modAccuracy"
+            >
+              0%
+            </div>
+          </div>
+          <div style="text-align: center">
+            <div
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                text-transform: uppercase;
+              "
+            >
+              Percentile
+            </div>
+            <div
+              style="font-size: 1.8rem; font-weight: 800; color: var(--purple)"
+              id="modPercentile"
+            >
+              0%
+            </div>
+          </div>
+          <div style="text-align: center">
+            <div
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                text-transform: uppercase;
+              "
+            >
+              Cut-off Status
+            </div>
+            <div
+              style="font-size: 1.8rem; font-weight: 800"
+              id="modCutoffStatus"
+            >
+              -
+            </div>
+          </div>
+          <div id="modQualContainer" style="display: none; text-align: center">
+            <div
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                text-transform: uppercase;
+              "
+              id="modQualTitle"
+            >
+              Qualifying
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 800" id="modQualStatus">
+              -
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-grid" id="modalSpeedometers"></div>
+      </div>
     </div>
 
-<script type="module">
-    // --- FIREBASE CLOUD SETUP ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    <script>
+      const $ = (id) => document.getElementById(id);
+      let chartsData = {},
+        modalCharts = {};
+      let editMockId = null;
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVAXOdqKnBgFKSe3tKn0omfeib4AdfzVU",
-      authDomain: "ssc-command-center-285cd.firebaseapp.com",
-      projectId: "ssc-command-center-285cd",
-      storageBucket: "ssc-command-center-285cd.firebasestorage.app",
-      messagingSenderId: "512383276315",
-      appId: "1:512383276315:web:95da05a6a05d3efb48efbe",
-      measurementId: "G-G3DWYBB80L"
-    };
+      // --- EXAM CONFIGURATION ENGINE ---
+      const UI_COLORS = [
+        "#38bdf8",
+        "#a855f7",
+        "#10b981",
+        "#f59e0b",
+        "#ec4899",
+        "#f97316",
+      ];
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+      const DEFAULT_EXAM_CONFIG = {
+        "SSC CGL": {
+          Pre: {
+            sections: [
+              {
+                id: "reas",
+                name: "Reasoning",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+              {
+                id: "gk",
+                name: "Gen Awareness",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+              {
+                id: "quant",
+                name: "Quant",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+              {
+                id: "eng",
+                name: "English",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+            ],
+          },
+          Mains: {
+            sections: [
+              {
+                id: "maths",
+                name: "Maths",
+                qs: 30,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "reas",
+                name: "Reasoning",
+                qs: 30,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "eng",
+                name: "English",
+                qs: 45,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "gk",
+                name: "Gen Awareness",
+                qs: 25,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "comp",
+                name: "Computer",
+                qs: 20,
+                pos: 3,
+                neg: 1,
+                type: "qualifying",
+                qualMarks: 18,
+              },
+            ],
+          },
+        },
+        "SSC CHSL": {
+          Pre: {
+            sections: [
+              {
+                id: "reas",
+                name: "Reasoning",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+              {
+                id: "gk",
+                name: "Gen Awareness",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+              {
+                id: "quant",
+                name: "Quant",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+              {
+                id: "eng",
+                name: "English",
+                qs: 25,
+                pos: 2,
+                neg: 0.5,
+                type: "main",
+              },
+            ],
+          },
+          Mains: {
+            sections: [
+              {
+                id: "maths",
+                name: "Maths",
+                qs: 30,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "reas",
+                name: "Reasoning",
+                qs: 30,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "eng",
+                name: "English",
+                qs: 40,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "gk",
+                name: "Gen Awareness",
+                qs: 20,
+                pos: 3,
+                neg: 1,
+                type: "main",
+              },
+              {
+                id: "comp",
+                name: "Computer",
+                qs: 15,
+                pos: 3,
+                neg: 1,
+                type: "qualifying",
+                qualMarks: 13.5,
+              },
+            ],
+          },
+        },
+        "RRB NTPC (Grad)": {
+          "CBT 1": {
+            sections: [
+              {
+                id: "maths",
+                name: "Maths",
+                qs: 30,
+                pos: 1,
+                neg: 0.333,
+                type: "main",
+              },
+              {
+                id: "reas",
+                name: "Reasoning",
+                qs: 30,
+                pos: 1,
+                neg: 0.333,
+                type: "main",
+              },
+              {
+                id: "gk",
+                name: "Gen Awareness",
+                qs: 40,
+                pos: 1,
+                neg: 0.333,
+                type: "main",
+              },
+            ],
+          },
+        },
+        "Banking PO": {
+          Pre: {
+            sections: [
+              {
+                id: "eng",
+                name: "English",
+                qs: 30,
+                pos: 1,
+                neg: 0.25,
+                type: "main",
+              },
+              {
+                id: "quant",
+                name: "Quant",
+                qs: 35,
+                pos: 1,
+                neg: 0.25,
+                type: "main",
+              },
+              {
+                id: "reas",
+                name: "Reasoning",
+                qs: 35,
+                pos: 1,
+                neg: 0.25,
+                type: "main",
+              },
+            ],
+          },
+        },
+      };
 
-    // --- TABLE GENERATION ---
-    const TOTAL_DAYS = 103; 
-    const START_DATE = new Date('2026-02-18T00:00:00'); 
-    
-    function generateTable() {
-        const tbody = document.getElementById('tableBody');
-        let html = '';
-        let activeDayNumber = "0"; 
+      let EXAM_CONFIG = JSON.parse(localStorage.getItem("ssc_exam_config"));
+      if (!EXAM_CONFIG || Object.keys(EXAM_CONFIG).length === 0) {
+        EXAM_CONFIG = DEFAULT_EXAM_CONFIG;
+        localStorage.setItem("ssc_exam_config", JSON.stringify(EXAM_CONFIG));
+      }
 
-        const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+      function saveExamConfig() {
+        localStorage.setItem("ssc_exam_config", JSON.stringify(EXAM_CONFIG));
+        initExamDropdowns();
+        updateDashboard();
+        populateDeleteExamDropdown();
+      }
 
-        for (let i = 1; i <= TOTAL_DAYS; i++) {
-            const d = new Date(START_DATE);
-            d.setDate(START_DATE.getDate() + (i - 1));
-            
-            const dd = String(d.getDate()).padStart(2, '0');
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const yyyy = d.getFullYear();
-            const dateStr = `${dd}-${mm}-${yyyy}`;
+      // --- CONFIG MANAGER (DRAFT BUILDER) ---
+      let draftSections = [];
 
-            const isToday = (dateStr === todayStr);
-            const rowClass = isToday ? 'is-today' : '';
-            const rowId = isToday ? 'todayRow' : `row-${i}`;
+      function toggleSettings() {
+        const c = $("settingsContainer");
+        const i = $("settingsIcon");
+        if (c.style.display === "none") {
+          c.style.display = "block";
+          i.innerText = "▲";
+        } else {
+          c.style.display = "none";
+          i.innerText = "▼";
+        }
+      }
 
-            if (isToday) activeDayNumber = i;
+      function toggleDraftQual() {
+        $("draftSecQualMarks").style.display =
+          $("draftSecType").value === "qualifying" ? "block" : "none";
+      }
 
-            // Helper function to create clickable cells
-            const createCell = (slotNum, text) => `
-                <td class="cell-target" id="d${i}-s${slotNum}" onclick="window.toggleCell('d${i}-s${slotNum}', this)">
-                    ${text}
-                </td>
-            `;
+      function addDraftSection() {
+        const name = $("draftSecName").value.trim();
+        const qs = parseInt($("draftSecQs").value);
+        const pos = parseFloat($("draftSecPos").value);
+        const neg = parseFloat($("draftSecNeg").value);
+        const type = $("draftSecType").value;
+        const qual = parseFloat($("draftSecQualMarks").value) || 0;
 
-            html += `
-                <tr class="${rowClass}" id="${rowId}">
-                    <td class="col-day">${i}</td>
-                    <td class="col-date">${dateStr}</td>
-                    ${createCell(1, `RBE Daily targets`)}
-                    ${createCell(2, `Polity - ${i}`)}
-                    ${createCell(3, `Lecture - ${i}`)}
-                    ${createCell(4, `PARMAR PYQ - ${i}`)}
-                    ${createCell(5, i % 7 === 0 ? `FULL MOCK - ${i/7}` : `MATH/REASONING`)}
-                    ${createCell(6, `Lecture till-${i * 3}`)}
-                </tr>
-            `;
+        if (!name || isNaN(qs) || isNaN(pos) || isNaN(neg)) {
+          alert("Please fill Name, Qs, Pos, and Neg marks.");
+          return;
         }
 
-        tbody.innerHTML = html;
-        document.getElementById('currentDayDisplay').innerText = activeDayNumber;
-        
-        // Auto-scroll to today
-        setTimeout(() => {
-            const row = document.getElementById('todayRow');
-            if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 500);
-    }
+        const id =
+          name.toLowerCase().replace(/\s+/g, "_").substring(0, 8) +
+          "_" +
+          Date.now().toString().slice(-4);
+        draftSections.push({
+          id,
+          name,
+          qs,
+          pos: Math.abs(pos),
+          neg: Math.abs(neg),
+          type,
+          qualMarks: qual,
+        });
 
-    // --- CELL TOGGLE & CLOUD SYNC LOGIC ---
-    window.toggleCell = async (id, tdElement) => {
-        const isCompleted = tdElement.classList.toggle('cell-done');
-        window.updateProgressBar();
+        $("draftSecName").value = "";
+        $("draftSecQs").value = "";
+        $("draftSecPos").value = "";
+        $("draftSecNeg").value = "";
+        $("draftSecQualMarks").value = "";
+        renderDraftTable();
+      }
 
-        document.getElementById('cloudStatus').innerText = "☁️ Saving...";
-        try {
-            await setDoc(doc(db, "ssc_daily_plan", "progress_v3"), {
-                [id]: isCompleted
-            }, { merge: true });
-            document.getElementById('cloudStatus').innerText = "☁️ Synced";
-        } catch(e) {
-            console.error("Firebase Sync Error", e);
-            document.getElementById('cloudStatus').innerText = "❌ Sync Error";
-            tdElement.classList.toggle('cell-done');
-            window.updateProgressBar();
+      function renderDraftTable() {
+        const list = $("draftSectionsList");
+        if (draftSections.length === 0) {
+          list.innerHTML = "";
+          return;
         }
-    };
 
-    // --- PROGRESS BAR ---
-    window.updateProgressBar = () => {
-        const total = document.querySelectorAll('.cell-target').length;
-        const completed = document.querySelectorAll('.cell-done').length;
-        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-        
-        document.getElementById('progressBar').style.width = percentage + '%';
-        document.getElementById('progressText').innerText = percentage + '%';
-    };
+        let html = `<table class="cfg-table" style="background:var(--card); border-radius:6px;"><thead><tr><th>Section</th><th>Qs</th><th>+</th><th>-</th><th>Type</th><th></th></tr></thead><tbody>`;
+        draftSections.forEach((s, idx) => {
+          html += `<tr>
+                  <td>${s.name}</td><td>${s.qs}</td><td>${s.pos}</td><td>${s.neg}</td>
+                  <td>${s.type === "qualifying" ? "Qual (" + s.qualMarks + ")" : "Main"}</td>
+                  <td><button class="btn-sm" style="color:var(--red); border-color:var(--red); padding: 2px 5px;" onclick="deleteDraftSection(${idx})">X</button></td>
+              </tr>`;
+        });
+        html += `</tbody></table>`;
+        list.innerHTML = html;
+      }
 
-    // --- LOAD CLOUD DATA ON STARTUP ---
-    async function loadCloudProgress() {
-        try {
-            const docSnap = await getDoc(doc(db, "ssc_daily_plan", "progress_v3"));
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                for (const [id, isCompleted] of Object.entries(data)) {
-                    if (isCompleted) {
-                        const cell = document.getElementById(id);
-                        if (cell) cell.classList.add('cell-done');
-                    }
-                }
-                window.updateProgressBar();
+      function deleteDraftSection(idx) {
+        draftSections.splice(idx, 1);
+        renderDraftTable();
+      }
+
+      function saveDraftExam() {
+        const ex = $("draftExamName").value.trim();
+        const ti = $("draftTierName").value.trim() || "Tier 1";
+
+        if (!ex) return alert("Exam Name is required!");
+        if (draftSections.length === 0)
+          return alert("Please add at least one section before saving.");
+
+        if (!EXAM_CONFIG[ex]) EXAM_CONFIG[ex] = {};
+        EXAM_CONFIG[ex][ti] = { sections: [...draftSections] };
+
+        saveExamConfig();
+
+        draftSections = [];
+        $("draftExamName").value = "";
+        $("draftTierName").value = "";
+        renderDraftTable();
+        alert(
+          `${ex} - ${ti} saved successfully! It is now available in the top header.`,
+        );
+      }
+
+      // --- DELETE EXAM / TIER ---
+      function populateDeleteExamDropdown() {
+        const sel = $("delExamSelect");
+        if (!sel) return;
+        sel.innerHTML = "";
+        Object.keys(EXAM_CONFIG).forEach(
+          (e) => (sel.innerHTML += `<option value="${e}">${e}</option>`),
+        );
+        populateDeleteTierDropdown();
+      }
+
+      function populateDeleteTierDropdown() {
+        const e = $("delExamSelect").value;
+        const tSel = $("delTierSelect");
+        if (!e || !tSel) return;
+        tSel.innerHTML = `<option value="ALL">All Tiers (Entire Exam)</option>`;
+        if (EXAM_CONFIG[e]) {
+          Object.keys(EXAM_CONFIG[e]).forEach(
+            (t) => (tSel.innerHTML += `<option value="${t}">${t}</option>`),
+          );
+        }
+      }
+
+      function deleteExamOrTier() {
+        const ex = $("delExamSelect").value;
+        const ti = $("delTierSelect").value;
+        if (!ex) return;
+
+        if (ti === "ALL") {
+          if (
+            confirm(
+              `WARNING: Permanently delete the ENTIRE "${ex}" config? Past scores will remain but can't be edited properly.`,
+            )
+          ) {
+            delete EXAM_CONFIG[ex];
+            saveExamConfig();
+            if ($("globalFilterExam").value === ex) {
+              $("globalFilterExam").value = Object.keys(EXAM_CONFIG)[0] || "";
+              updateGlobalTierFilter();
             }
-            document.getElementById('cloudStatus').innerText = "☁️ Synced";
-        } catch(e) {
-            console.error("Error loading cloud data", e);
-            document.getElementById('cloudStatus').innerText = "❌ Offline";
+          }
+        } else {
+          if (confirm(`Delete "${ti}" from "${ex}"?`)) {
+            delete EXAM_CONFIG[ex][ti];
+            if (Object.keys(EXAM_CONFIG[ex]).length === 0)
+              delete EXAM_CONFIG[ex];
+            saveExamConfig();
+            updateGlobalTierFilter();
+          }
         }
-    }
+      }
 
-    // Initialize the Application
-    generateTable();
-    loadCloudProgress();
+      // --- THEME CUSTOMIZER ---
+      function applyCustomTheme() {
+        const color = $("themeAccent").value;
+        const opacity = $("themeOpacity").value;
 
-</script>
-</body>
+        document.documentElement.style.setProperty("--accent", color);
+        document.documentElement.style.setProperty("--card-opacity", opacity);
+
+        localStorage.setItem("ssc_custom_accent", color);
+        localStorage.setItem("ssc_custom_opacity", opacity);
+
+        if (chartsData.main) {
+          chartsData.main.data.datasets[0].borderColor = color;
+          chartsData.main.data.datasets[0].pointBorderColor = color;
+          chartsData.main.update();
+        }
+      }
+
+      function resetTheme() {
+        document.documentElement.style.setProperty("--accent", "#38bdf8");
+        document.documentElement.style.setProperty("--card-opacity", "1");
+        localStorage.removeItem("ssc_custom_accent");
+        localStorage.removeItem("ssc_custom_opacity");
+        $("themeAccent").value = "#38bdf8";
+        $("themeOpacity").value = "1";
+        if (chartsData.main) {
+          chartsData.main.data.datasets[0].borderColor = "#38bdf8";
+          chartsData.main.data.datasets[0].pointBorderColor = "#38bdf8";
+          chartsData.main.update();
+        }
+      }
+
+      function initTheme() {
+        const savedTheme = localStorage.getItem("ssc_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        if ($("themeToggleBtn"))
+          $("themeToggleBtn").innerText = savedTheme === "light" ? "🌙" : "🌞";
+        Chart.defaults.color = savedTheme === "light" ? "#64748b" : "#94a3b8";
+        Chart.defaults.font.family = "Inter";
+
+        const savedAccent = localStorage.getItem("ssc_custom_accent");
+        const savedOpacity = localStorage.getItem("ssc_custom_opacity");
+        if (savedAccent) {
+          document.documentElement.style.setProperty("--accent", savedAccent);
+          if ($("themeAccent")) $("themeAccent").value = savedAccent;
+        }
+        if (savedOpacity) {
+          document.documentElement.style.setProperty(
+            "--card-opacity",
+            savedOpacity,
+          );
+          if ($("themeOpacity")) $("themeOpacity").value = savedOpacity;
+        }
+      }
+
+      function toggleTheme() {
+        const current = document.documentElement.getAttribute("data-theme");
+        const newTheme = current === "light" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("ssc_theme", newTheme);
+        if ($("themeToggleBtn"))
+          $("themeToggleBtn").innerText = newTheme === "light" ? "🌙" : "🌞";
+        Chart.defaults.color = newTheme === "light" ? "#64748b" : "#94a3b8";
+        const modStatsBg = $("modStatsBg");
+        if (modStatsBg)
+          modStatsBg.style.background =
+            newTheme === "light"
+              ? "rgba(15, 23, 42, 0.05)"
+              : "rgba(15, 23, 42, 0.5)";
+        updateDashboard();
+      }
+
+      // --- INITIALIZATION & DROPDOWNS ---
+      function initExamDropdowns() {
+        const exams = Object.keys(EXAM_CONFIG);
+        const fExam = $("globalFilterExam");
+
+        const curE = fExam.value;
+        fExam.innerHTML = ""; // Removed "All Exams"
+        exams.forEach(
+          (e) => (fExam.innerHTML += `<option value="${e}">${e}</option>`),
+        );
+
+        if (curE && EXAM_CONFIG[curE]) fExam.value = curE;
+        else
+          fExam.value = exams.includes("SSC CGL")
+            ? "SSC CGL"
+            : Object.keys(EXAM_CONFIG)[0];
+
+        updateGlobalTierFilter();
+      }
+
+      function updateGlobalTierFilter() {
+        const exam = $("globalFilterExam").value;
+        const fTier = $("globalFilterTier");
+        const curT = fTier.value;
+
+        fTier.innerHTML = ""; // Removed "All Tiers"
+
+        if (exam && EXAM_CONFIG[exam]) {
+          Object.keys(EXAM_CONFIG[exam]).forEach(
+            (t) => (fTier.innerHTML += `<option value="${t}">${t}</option>`),
+          );
+          if (curT && EXAM_CONFIG[exam][curT]) fTier.value = curT;
+          else fTier.value = Object.keys(EXAM_CONFIG[exam])[0];
+        }
+
+        updateTopBarStatus();
+        buildFormTable();
+        loadGlobalTarget();
+      }
+
+      function updateTopBarStatus() {
+        const ex = $("globalFilterExam").value;
+        const ti = $("globalFilterTier").value;
+        const st = $("activeExamDisplay");
+        st.innerText = `Current: ${ex} - ${ti}`;
+      }
+
+      // --- TARGET SCORE ENGINE ---
+      function getTargetKey() {
+        const ex = $("globalFilterExam").value;
+        const ti = $("globalFilterTier").value;
+        return `sscTarget_${ex}_${ti}`;
+      }
+
+      function loadGlobalTarget() {
+        const key = getTargetKey();
+        let t = localStorage.getItem(key);
+        if (!t) t = localStorage.getItem("sscGlobalTarget") || 150; // Fallback
+
+        if ($("globalTargetInp")) $("globalTargetInp").value = t;
+      }
+
+      function updateGlobalTarget() {
+        const val = parseFloat($("globalTargetInp").value) || 150;
+        localStorage.setItem(getTargetKey(), val);
+        updateDashboard();
+      }
+
+      // --- DYNAMIC FORM GENERATION ---
+      function buildFormTable() {
+        const exam = $("globalFilterExam").value;
+        const tier = $("globalFilterTier").value;
+        const tbody = $("formTableBody");
+
+        if (!exam || !tier || !EXAM_CONFIG[exam] || !EXAM_CONFIG[exam][tier]) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--muted);">⚠️ Setup an Exam and Tier to add data.</td></tr>`;
+          $("submitBtn").disabled = true;
+          $("submitBtn").style.opacity = 0.5;
+          $("liveScore").style.opacity = 0.5;
+          return;
+        }
+
+        $("submitBtn").disabled = false;
+        $("submitBtn").style.opacity = 1;
+        $("liveScore").style.opacity = 1;
+        tbody.innerHTML = "";
+
+        const sections = EXAM_CONFIG[exam][tier].sections;
+        sections.forEach((sec, idx) => {
+          const color = UI_COLORS[idx % UI_COLORS.length];
+          const qualBadge =
+            sec.type === "qualifying"
+              ? `<span class="qualifying-badge">Qualifying</span>`
+              : "";
+          tbody.innerHTML += `
+                <tr>
+                  <td class="row-lbl" style="color: ${color}">${sec.name} ${qualBadge}</td>
+                  <td><input type="number" id="c_${sec.id}" min="0" max="${sec.qs}" placeholder="0" oninput="liveCalculate()" /></td>
+                  <td><input type="number" id="w_${sec.id}" min="0" max="${sec.qs}" placeholder="0" oninput="liveCalculate()" /></td>
+                  <td><input type="number" id="t_${sec.id}" min="0" placeholder="0" /></td>
+                </tr>
+              `;
+        });
+        liveCalculate();
+      }
+
+      function liveCalculate() {
+        const exam = $("globalFilterExam").value;
+        const tier = $("globalFilterTier").value;
+        if (!exam || !tier || !EXAM_CONFIG[exam] || !EXAM_CONFIG[exam][tier]) {
+          $("lsMain").innerText = "Total: 0";
+          if ($("lsQual")) $("lsQual").style.display = "none";
+          return;
+        }
+
+        let tMain = 0,
+          tQual = 0;
+
+        EXAM_CONFIG[exam][tier].sections.forEach((sec) => {
+          const c = parseFloat($(`c_${sec.id}`).value) || 0;
+          const w = parseFloat($(`w_${sec.id}`).value) || 0;
+          const score = c * Math.abs(sec.pos) - w * Math.abs(sec.neg);
+
+          if (sec.type === "main") tMain += score;
+          else if (sec.type === "qualifying") tQual += score;
+        });
+
+        $("lsMain").innerText = `Total: ${tMain.toFixed(2)}`;
+        if ($("lsQual")) {
+          if (tQual > 0) {
+            $("lsQual").style.display = "block";
+            $("lsQual").innerText = `Qualifying Score: ${tQual.toFixed(2)}`;
+          } else {
+            $("lsQual").style.display = "none";
+          }
+        }
+      }
+
+      // --- DATA MANAGEMENT & MIGRATION ---
+      let db = JSON.parse(localStorage.getItem("sscScores_Analytics")) || [];
+
+      db = db.map((mock) => {
+        if (!mock.exam) {
+          mock.exam = "SSC CGL";
+          mock.tier = "Pre";
+          const d = mock.data;
+          mock.data = {
+            reas: d.R || { c: 0, w: 0, t: 0 },
+            gk: d.G || { c: 0, w: 0, t: 0 },
+            quant: d.Q || { c: 0, w: 0, t: 0 },
+            eng: d.E || { c: 0, w: 0, t: 0 },
+          };
+        }
+
+        if (EXAM_CONFIG[mock.exam] && EXAM_CONFIG[mock.exam][mock.tier]) {
+          let recalcMain = 0;
+          EXAM_CONFIG[mock.exam][mock.tier].sections.forEach((sec) => {
+            if (sec.type === "main" && mock.data[sec.id]) {
+              const d = mock.data[sec.id];
+              recalcMain += d.c * Math.abs(sec.pos) - d.w * Math.abs(sec.neg);
+            }
+          });
+          mock.totalScore = parseFloat(recalcMain.toFixed(2));
+        }
+
+        mock.perc = mock.perc || 0;
+        mock.level = mock.level || "Moderate";
+        return mock;
+      });
+      localStorage.setItem("sscScores_Analytics", JSON.stringify(db));
+
+      // --- PROVIDERS ---
+      let providers = JSON.parse(localStorage.getItem("sscProviders")) || [
+        "Testbook",
+        "Oliveboard",
+        "RBE",
+        "ProMocks",
+        "TestRanking",
+      ];
+      function renderProviders() {
+        const mProv = $("mProv"),
+          filterProv = $("filterProv");
+        const curM = mProv ? mProv.value : null;
+        const curF = filterProv ? filterProv.value : null;
+
+        if (mProv) mProv.innerHTML = "";
+        if (filterProv)
+          filterProv.innerHTML = '<option value="All">All Providers</option>';
+        providers.forEach((p) => {
+          if (mProv) mProv.innerHTML += `<option value="${p}">${p}</option>`;
+          if (filterProv)
+            filterProv.innerHTML += `<option value="${p}">${p}</option>`;
+        });
+        if (mProv)
+          mProv.innerHTML += `<option value="ADD_NEW" style="font-weight:bold; color:var(--accent);">+ Add Custom...</option>`;
+        if (mProv && providers.includes(curM)) mProv.value = curM;
+        if (filterProv && providers.includes(curF)) filterProv.value = curF;
+      }
+
+      function checkAddProvider(selectElem) {
+        if (selectElem.value === "ADD_NEW") {
+          let newP = prompt("Enter new mock provider name:");
+          if (newP && newP.trim() && !providers.includes(newP.trim())) {
+            providers.push(newP.trim());
+            localStorage.setItem("sscProviders", JSON.stringify(providers));
+            renderProviders();
+            selectElem.value = newP.trim();
+          } else renderProviders();
+        }
+      }
+
+      // --- INITIAL BOOTSTRAP ---
+      initTheme();
+      initExamDropdowns();
+      renderProviders();
+      populateDeleteExamDropdown();
+      $("mDate").valueAsDate = new Date();
+
+      function saveApiKey(val) {
+        localStorage.setItem("ssc_gemini_api_key", val);
+      }
+      const savedGeminiKey = localStorage.getItem("ssc_gemini_api_key");
+      if (savedGeminiKey && $("geminiApiKey"))
+        $("geminiApiKey").value = savedGeminiKey;
+
+      function toggleForm() {
+        const f = $("scoreFormWrapper"),
+          icon = $("formIcon");
+        const isHidden = f.style.display === "none";
+        f.style.display = isHidden ? "block" : "none";
+        icon.innerText = isHidden ? "▼" : "▶";
+      }
+
+      // --- AI SCREENSHOT EXTRACTION (REAL GEMINI API) ---
+      async function handleScreenshotUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const apiKey = $("geminiApiKey").value.trim();
+        if (!apiKey) {
+          alert("Please enter your Gemini API Key in the Settings menu first.");
+          event.target.value = "";
+          return;
+        }
+
+        const loadingText = $("aiLoading");
+        loadingText.style.display = "block";
+        loadingText.innerText =
+          "⏳ Extracting data with Gemini AI... Please wait.";
+
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+          const base64Image = e.target.result.split(",")[1];
+          const mimeType = file.type;
+
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+          const promptText = `Analyze this exam mock test scorecard screenshot. Extract the following details and return ONLY a raw, valid JSON object (no markdown, no backticks, no code blocks):
+            {
+              "percentile": number (or 0 if not found),
+              "cutoff": number (or null if not found),
+              "sections": [
+                {
+                  "subject": "Subject name as written in image",
+                  "correct": number,
+                  "wrong": number,
+                  "time": number (time spent in minutes)
+                }
+              ]
+            }`;
+
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      { text: promptText },
+                      {
+                        inline_data: { mime_type: mimeType, data: base64Image },
+                      },
+                    ],
+                  },
+                ],
+              }),
+            });
+
+            if (!response.ok) throw new Error("API Request Failed");
+
+            const data = await response.json();
+
+            let aiText = data.candidates[0].content.parts[0].text.trim();
+            aiText = aiText
+              .replace(/^```json/i, "")
+              .replace(/^```/, "")
+              .replace(/```$/i, "")
+              .trim();
+
+            const extractedData = JSON.parse(aiText);
+
+            if (extractedData.percentile && $("mPerc"))
+              $("mPerc").value = extractedData.percentile;
+            if (extractedData.cutoff && $("mCutoff"))
+              $("mCutoff").value = extractedData.cutoff;
+
+            const exam = $("globalFilterExam").value;
+            const tier = $("globalFilterTier").value;
+            const currentSections = EXAM_CONFIG[exam][tier].sections;
+
+            if (extractedData.sections && extractedData.sections.length > 0) {
+              currentSections.forEach((sec) => {
+                const match = extractedData.sections.find(
+                  (s) =>
+                    s.subject
+                      .toLowerCase()
+                      .includes(sec.name.toLowerCase().substring(0, 4)) ||
+                    sec.name
+                      .toLowerCase()
+                      .includes(s.subject.toLowerCase().substring(0, 4)),
+                );
+
+                if (match) {
+                  if ($(`c_${sec.id}`))
+                    $(`c_${sec.id}`).value = match.correct || 0;
+                  if ($(`w_${sec.id}`))
+                    $(`w_${sec.id}`).value = match.wrong || 0;
+                  if ($(`t_${sec.id}`))
+                    $(`t_${sec.id}`).value = match.time || 0;
+                }
+              });
+            }
+
+            liveCalculate();
+            loadingText.innerText = "✅ Extraction Complete!";
+            loadingText.style.color = "var(--green)";
+            setTimeout(() => {
+              loadingText.style.display = "none";
+              loadingText.style.color = "var(--accent)";
+            }, 4000);
+          } catch (error) {
+            console.error("Gemini Extraction Error:", error);
+            loadingText.innerText =
+              "❌ Error extracting data. Check your API key and try again.";
+            loadingText.style.color = "var(--red)";
+            setTimeout(() => {
+              loadingText.style.display = "none";
+              loadingText.style.color = "var(--accent)";
+            }, 4000);
+          }
+
+          event.target.value = "";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // --- FORM SUBMISSION ---
+      $("scoreForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const exam = $("globalFilterExam").value;
+        const tier = $("globalFilterTier").value;
+
+        if (!exam || !tier) {
+          alert(
+            "Please select an Exam and Tier from the top header to save data.",
+          );
+          return;
+        }
+
+        const sections = EXAM_CONFIG[exam][tier].sections;
+
+        const mockData = {
+          id: editMockId || Date.now(),
+          date: $("mDate").value,
+          prov: $("mProv").value,
+          level: $("mLevel").value,
+          name: $("mName").value,
+          perc: parseFloat($("mPerc").value) || 0,
+          cutoff: parseFloat($("mCutoff").value) || null,
+          exam: exam,
+          tier: tier,
+          data: {},
+        };
+
+        let tC = 0,
+          tW = 0,
+          tT = 0,
+          scoreMain = 0;
+        sections.forEach((sec) => {
+          const c = parseFloat($(`c_${sec.id}`).value) || 0;
+          const w = parseFloat($(`w_${sec.id}`).value) || 0;
+          const t = parseFloat($(`t_${sec.id}`).value) || 0;
+          mockData.data[sec.id] = { c, w, t };
+
+          if (sec.type === "main") {
+            tC += c;
+            tW += w;
+            tT += t;
+            scoreMain += c * Math.abs(sec.pos) - w * Math.abs(sec.neg);
+          }
+        });
+
+        mockData.tCor = tC;
+        mockData.tWro = tW;
+        mockData.tTime = tT;
+        mockData.totalScore = parseFloat(scoreMain.toFixed(2));
+
+        if (editMockId) {
+          const idx = db.findIndex((m) => m.id === editMockId);
+          if (idx > -1) db[idx] = mockData;
+          editMockId = null;
+          $("submitBtn").innerText = "Save Analytics";
+          $("cancelEditBtn").style.display = "none";
+        } else {
+          db.push(mockData);
+        }
+
+        localStorage.setItem("sscScores_Analytics", JSON.stringify(db));
+
+        sections.forEach((sec) => {
+          $(`c_${sec.id}`).value = "";
+          $(`w_${sec.id}`).value = "";
+          $(`t_${sec.id}`).value = "";
+        });
+        ["mPerc", "mCutoff", "mName"].forEach((id) => ($(id).value = ""));
+        $("mLevel").value = "Moderate";
+        $("mDate").valueAsDate = new Date();
+        $("lsMain").innerText = "Total: 0";
+        if ($("lsQual")) $("lsQual").style.display = "none";
+
+        updateDashboard();
+      });
+
+      window.editMock = (id) => {
+        const mock = db.find((m) => m.id === id);
+        if (!mock) return;
+        editMockId = mock.id;
+
+        $("globalFilterExam").value = mock.exam || "SSC CGL";
+        updateGlobalTierFilter();
+        $("globalFilterTier").value = mock.tier || "Pre";
+        updateTopBarStatus();
+        buildFormTable();
+
+        $("mDate").value = mock.date;
+        if (!providers.includes(mock.prov)) {
+          providers.push(mock.prov);
+          localStorage.setItem("sscProviders", JSON.stringify(providers));
+          renderProviders();
+        }
+        $("mProv").value = mock.prov;
+        $("mLevel").value = mock.level || "Moderate";
+        $("mName").value = mock.name;
+        $("mPerc").value = mock.perc || "";
+        $("mCutoff").value = mock.cutoff || "";
+
+        const sections =
+          EXAM_CONFIG[mock.exam || "SSC CGL"][mock.tier || "Pre"].sections;
+        sections.forEach((sec) => {
+          if (mock.data[sec.id]) {
+            $(`c_${sec.id}`).value = mock.data[sec.id].c || "";
+            $(`w_${sec.id}`).value = mock.data[sec.id].w || "";
+            $(`t_${sec.id}`).value = mock.data[sec.id].t || "";
+          }
+        });
+
+        liveCalculate();
+        $("submitBtn").innerText = "Update Analytics";
+        $("cancelEditBtn").style.display = "block";
+        if ($("scoreFormWrapper").style.display === "none") toggleForm();
+        $("mDate").scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+
+      window.cancelEdit = () => {
+        editMockId = null;
+        $("scoreForm").reset();
+        $("mDate").valueAsDate = new Date();
+        $("mLevel").value = "Moderate";
+        $("submitBtn").innerText = "Save Analytics";
+        $("cancelEditBtn").style.display = "none";
+        liveCalculate();
+      };
+
+      // --- MOCK MODAL (DYNAMIC) ---
+      window.openAnalysisModal = (id) => {
+        const mock = db.find((m) => m.id === id);
+        if (!mock) return;
+
+        const isLight =
+          document.documentElement.getAttribute("data-theme") === "light";
+        $("modStatsBg").style.background = isLight
+          ? "rgba(15, 23, 42, 0.05)"
+          : "rgba(15, 23, 42, 0.5)";
+
+        $("modNameTitle").innerText = mock.name;
+        const lvlCol =
+          mock.level === "Hard"
+            ? "var(--red)"
+            : mock.level === "Easy"
+              ? "var(--green)"
+              : "var(--yellow)";
+        let subHTML = `${mock.date} &nbsp;&bull;&nbsp; ${mock.exam} (${mock.tier}) &nbsp;&bull;&nbsp; ${mock.prov} &nbsp;&bull;&nbsp; <span style="color:${lvlCol}">${mock.level || "Moderate"}</span>`;
+        $("modSubTitle").innerHTML = subHTML;
+
+        $("modTotalScore").innerText = mock.totalScore;
+        $("modAccuracy").innerText =
+          mock.tCor + mock.tWro > 0
+            ? Math.round((mock.tCor / (mock.tCor + mock.tWro)) * 100) + "%"
+            : "0%";
+        $("modPercentile").innerText = mock.perc > 0 ? mock.perc + "%" : "N/A";
+
+        const cutEl = $("modCutoffStatus");
+        if (mock.cutoff) {
+          cutEl.innerText =
+            mock.totalScore >= mock.cutoff ? "Cleared ✅" : "Missed ❌";
+          cutEl.style.color =
+            mock.totalScore >= mock.cutoff ? "var(--green)" : "var(--red)";
+        } else {
+          cutEl.innerText = "No Cut-off";
+          cutEl.style.color = "var(--muted)";
+        }
+
+        const sections = EXAM_CONFIG[mock.exam][mock.tier].sections;
+        const grid = $("modalSpeedometers");
+        grid.innerHTML = "";
+
+        let qualSection = null;
+        let qualScore = 0;
+
+        sections.forEach((sec, idx) => {
+          const color = UI_COLORS[idx % UI_COLORS.length];
+          const d = mock.data[sec.id] || { c: 0, w: 0, t: 0 };
+          const score = d.c * Math.abs(sec.pos) - d.w * Math.abs(sec.neg);
+
+          if (sec.type === "qualifying") {
+            qualSection = sec;
+            qualScore = score;
+          }
+
+          grid.innerHTML += `
+                <div class="speedometer-box">
+                    <div style="font-weight: bold; color: ${color}; margin-bottom: 10px;">${sec.name} ${sec.type === "qualifying" ? "(Qual)" : ""}</div>
+                    <div style="position: relative; height: 120px">
+                        <canvas id="gauge_${sec.id}"></canvas>
+                        <div style="position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 1.4rem; font-weight: bold; color: var(--text);">${score.toFixed(2)}</div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 0.85rem; color: var(--muted); display: flex; justify-content: space-between;">
+                        <span>Cor: <strong style="color: var(--green)">${d.c}</strong></span>
+                        <span>Wro: <strong style="color: var(--red)">${d.w}</strong></span>
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.85rem; color: var(--muted); display: flex; justify-content: space-between;">
+                        <span>Time: <strong style="color: var(--text)">${d.t}m</strong></span>
+                        <span title="Marks Per Minute">ROI: <strong style="color: var(--text)">${d.t > 0 ? (score / d.t).toFixed(1) : "0"}</strong></span>
+                    </div>
+                </div>
+            `;
+        });
+
+        sections.forEach((sec, idx) => {
+          const color = UI_COLORS[idx % UI_COLORS.length];
+          const d = mock.data[sec.id] || { c: 0, w: 0 };
+          const score = d.c * Math.abs(sec.pos) - d.w * Math.abs(sec.neg);
+          const maxScore = sec.qs * Math.abs(sec.pos);
+          const disp = Math.max(0, score);
+
+          if (modalCharts[sec.id]) modalCharts[sec.id].destroy();
+          const gaugeBg = isLight
+            ? "rgba(0,0,0,0.05)"
+            : "rgba(255,255,255,0.05)";
+
+          const ctx = $(`gauge_${sec.id}`).getContext("2d");
+          modalCharts[sec.id] = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              datasets: [
+                {
+                  data: [disp, Math.max(0, maxScore - disp)],
+                  backgroundColor: [color, gaugeBg],
+                  borderWidth: 0,
+                },
+              ],
+            },
+            options: {
+              rotation: 270,
+              circumference: 180,
+              cutout: "75%",
+              plugins: { tooltip: { enabled: false } },
+              maintainAspectRatio: false,
+            },
+          });
+        });
+
+        const qualC = $("modQualContainer");
+        if (qualSection) {
+          qualC.style.display = "block";
+          $("modQualTitle").innerText = `${qualSection.name} (Qualifying)`;
+          if (qualScore >= qualSection.qualMarks) {
+            $("modQualStatus").innerText = "Passed ✅";
+            $("modQualStatus").style.color = "var(--green)";
+          } else {
+            $("modQualStatus").innerText = "Failed ❌";
+            $("modQualStatus").style.color = "var(--red)";
+          }
+        } else {
+          qualC.style.display = "none";
+        }
+
+        $("analysisModal").style.display = "flex";
+      };
+
+      window.closeAnalysisModal = () =>
+        ($("analysisModal").style.display = "none");
+
+      // --- DATA EXPORT / IMPORT ---
+      window.exportJSON = () => {
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(db));
+        const a = document.createElement("a");
+        a.href = dataStr;
+        a.download = "universal_mock_backup.json";
+        a.click();
+      };
+
+      window.importJSON = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const r = new FileReader();
+        r.onload = (ev) => {
+          try {
+            const newDb = JSON.parse(ev.target.result);
+            if (
+              Array.isArray(newDb) &&
+              confirm("This will overwrite existing data. Proceed?")
+            ) {
+              db = newDb;
+              localStorage.setItem("sscScores_Analytics", JSON.stringify(db));
+              updateDashboard();
+              alert("Backup Restored Successfully!");
+            }
+          } catch (err) {
+            alert("Invalid JSON file");
+          }
+          e.target.value = "";
+        };
+        r.readAsText(file);
+      };
+
+      // --- RENDER LOGIC ---
+      function updateDashboard() {
+        db.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        updateTopBarStatus();
+
+        const fExam = $("globalFilterExam").value;
+        const fTier = $("globalFilterTier").value;
+        const fProv = $("filterProv").value;
+
+        let filteredDb = db;
+        if (fExam !== "All")
+          filteredDb = filteredDb.filter((m) => m.exam === fExam);
+        if (fTier !== "All")
+          filteredDb = filteredDb.filter((m) => m.tier === fTier);
+        if (fProv !== "All")
+          filteredDb = filteredDb.filter((m) => m.prov === fProv);
+
+        renderOverallStats(filteredDb);
+        renderHistory(filteredDb);
+
+        if (
+          !fExam ||
+          !fTier ||
+          !EXAM_CONFIG[fExam] ||
+          !EXAM_CONFIG[fExam][fTier]
+        ) {
+          $("sectionalWarning").style.display = "block";
+          $("dynamicSectionalData").style.display = "none";
+          $("sectionChartCard").style.display = "none";
+          renderTotalTrendChart(filteredDb);
+        } else {
+          $("sectionalWarning").style.display = "none";
+          $("dynamicSectionalData").style.display = "block";
+          $("sectionChartCard").style.display = "block";
+          renderSectionalDash(filteredDb, fExam, fTier);
+          renderTotalTrendChart(filteredDb);
+        }
+      }
+
+      function renderOverallStats(fDb) {
+        $("st-total").innerText = fDb.length;
+        if (!fDb.length) {
+          ["st-avg", "st-recent"].forEach((id) => ($(id).innerText = "0"));
+          ["st-acc", "st-perc"].forEach((id) => ($(id).innerText = "0%"));
+          return;
+        }
+
+        let tSum = 0,
+          tPerc = 0,
+          vPerc = 0,
+          tAtt = 0,
+          tCor = 0;
+        fDb.forEach((m) => {
+          tSum += m.totalScore;
+          if (m.perc > 0) {
+            tPerc += m.perc;
+            vPerc++;
+          }
+          tAtt += m.tCor + m.tWro;
+          tCor += m.tCor;
+        });
+
+        $("st-avg").innerText = (tSum / fDb.length).toFixed(1);
+        $("st-perc").innerText =
+          vPerc > 0 ? (tPerc / vPerc).toFixed(1) + "%" : "0%";
+        $("st-acc").innerText =
+          tAtt > 0 ? Math.round((tCor / tAtt) * 100) + "%" : "0%";
+
+        const recDb = fDb.slice(-5);
+        let rSum = 0;
+        recDb.forEach((m) => (rSum += m.totalScore));
+        $("st-recent").innerText =
+          recDb.length > 0 ? (rSum / recDb.length).toFixed(1) : "0";
+      }
+
+      function renderSectionalDash(fDb, exam, tier) {
+        const config = EXAM_CONFIG[exam][tier];
+        const len = fDb.length;
+        const recDb = fDb.slice(-5);
+
+        const saGrid = $("saGrid");
+        saGrid.innerHTML = "";
+        const timeGrid = $("timeGrid");
+        timeGrid.innerHTML = "";
+        const accContainer = $("accSkipContainer");
+        accContainer.innerHTML = "";
+
+        let datasetsLine = [];
+
+        config.sections.forEach((sec, idx) => {
+          const color = UI_COLORS[idx % UI_COLORS.length];
+
+          let sTot = 0,
+            rTot = 0,
+            tTime = 0,
+            tC = 0,
+            tAtt = 0,
+            validTimeCount = 0;
+          let lineData = [];
+
+          fDb.forEach((m) => {
+            const d = m.data[sec.id] || { c: 0, w: 0, t: 0 };
+            const score = d.c * Math.abs(sec.pos) - d.w * Math.abs(sec.neg);
+            sTot += score;
+            if (d.t > 0) {
+              tTime += d.t;
+              validTimeCount++;
+            }
+            tC += d.c;
+            tAtt += d.c + d.w;
+            lineData.push(score);
+          });
+
+          recDb.forEach((m) => {
+            const d = m.data[sec.id] || { c: 0, w: 0 };
+            rTot += d.c * Math.abs(sec.pos) - d.w * Math.abs(sec.neg);
+          });
+
+          const avgAll = len > 0 ? (sTot / len).toFixed(1) : "0.0";
+          const avgR =
+            recDb.length > 0 ? (rTot / recDb.length).toFixed(1) : "0.0";
+          const avgT =
+            validTimeCount > 0 ? Math.round(tTime / validTimeCount) : "0";
+          const acc = tAtt > 0 ? Math.round((tC / tAtt) * 100) : 0;
+          const skip =
+            len > 0 ? Math.max(0, sec.qs - tAtt / len).toFixed(1) : sec.qs;
+
+          saGrid.innerHTML += `<div class="sec-stat-box" style="border-top-color: ${color}"><div class="sec-title" style="color: ${color}">${sec.name} ${sec.type === "qualifying" ? "(Q)" : ""}</div><div class="sec-scores"><div><div class="sec-val">${avgAll}</div><div class="sec-lbl">Overall</div></div><div><div class="sec-val">${avgR}</div><div class="sec-lbl">Last 5</div></div></div></div>`;
+          timeGrid.innerHTML += `<div class="time-badge"><span>${sec.name}</span><div class="time-val-text" style="color: ${color}">${avgT}m</div></div>`;
+          accContainer.innerHTML += `<div class="acc-skip-row"><div class="as-header"><span style="color: ${color}">${sec.name}</span><div class="as-stats"><span>Acc: <strong>${acc}%</strong></span><span>Skip: <strong>${skip}/${sec.qs}</strong></span></div></div><div class="progress-bg"><div class="progress-fill" style="width: ${acc}%; background: ${color}"></div></div></div>`;
+
+          datasetsLine.push({
+            label: sec.name,
+            data: lineData,
+            borderColor: color,
+            tension: 0.3,
+          });
+        });
+
+        if (chartsData.sec) chartsData.sec.destroy();
+        const isLight =
+          document.documentElement.getAttribute("data-theme") === "light";
+        const labels = fDb.map((m) => m.name);
+        chartsData.sec = new Chart($("sectionChart").getContext("2d"), {
+          type: "line",
+          data: { labels, datasets: datasetsLine },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { grid: { color: isLight ? "#e2e8f0" : "#334155" } },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+      }
+
+      function renderTotalTrendChart(fDb) {
+        if (chartsData.main) chartsData.main.destroy();
+        if (!fDb.length) return;
+
+        const isLight =
+          document.documentElement.getAttribute("data-theme") === "light";
+        const gridColor = isLight ? "#e2e8f0" : "#334155";
+        const labels = fDb.map((m) => m.name);
+
+        const cssAccent =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue("--accent")
+            .trim() || "#38bdf8";
+
+        let targetVal = parseFloat(localStorage.getItem(getTargetKey())) || 150;
+
+        chartsData.main = new Chart($("mainChart").getContext("2d"), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Total Score",
+                data: fDb.map((m) => m.totalScore),
+                borderColor: cssAccent,
+                backgroundColor: "rgba(56, 189, 248, 0.1)",
+                borderWidth: 3,
+                pointBackgroundColor: "#0f172a",
+                pointBorderColor: cssAccent,
+                fill: true,
+                tension: 0.3,
+              },
+              {
+                label: "Target Goal",
+                data: Array(fDb.length).fill(targetVal),
+                borderColor: "#10b981",
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                fill: false,
+              },
+              {
+                label: "Mock Cut-off",
+                data: fDb.map((m) => m.cutoff || null),
+                borderColor: "#ef4444",
+                borderWidth: 2,
+                borderDash: [2, 2],
+                pointRadius: 0,
+                fill: false,
+                stepped: true,
+                spanGaps: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { grid: { color: gridColor } },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+      }
+
+      function renderHistory(fDb) {
+        const div = $("historyList");
+        if (!fDb.length) {
+          div.innerHTML =
+            '<div style="color:var(--muted); padding:10px 0;">No mocks found.</div>';
+          return;
+        }
+
+        div.innerHTML = "";
+        [...fDb].reverse().forEach((m) => {
+          let lvlCol =
+            m.level === "Hard"
+              ? "var(--red)"
+              : m.level === "Easy"
+                ? "var(--green)"
+                : "var(--yellow)";
+          div.innerHTML += `
+            <div class="hist-item">
+                <div>
+                    <div style="font-weight:bold; font-size:0.9rem; color:var(--text); display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                        ${m.name} 
+                        <span style="font-size:0.6rem; font-weight:normal; color:var(--text); border:1px solid var(--border); padding:2px 6px; border-radius:4px;">${m.exam} - ${m.tier}</span>
+                        <span style="font-size:0.6rem; color:${lvlCol}; border: 1px solid ${lvlCol}; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">${m.level || "Moderate"}</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-top: 4px;">
+                        ${m.date} &bull; ${m.prov} &bull; ${m.perc > 0 ? m.perc + "%ile" : "No %ile Data"}
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span style="font-size:1.2rem; font-weight:800; color:var(--accent);">${m.totalScore}</span>
+                    <div style="display:flex; gap:12px;">
+                        <span style="color:var(--green); cursor:pointer; font-size:1.1rem;" onclick="openAnalysisModal(${m.id})" title="Analyze Mock">📊</span>
+                        <span style="color:var(--accent); cursor:pointer; font-size:1.1rem;" onclick="editMock(${m.id})" title="Edit Mock">✏️</span>
+                        <span style="color:var(--red); cursor:pointer; font-size:1.1rem;" onclick="deleteMock(${m.id})" title="Delete Mock">🗑️</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+      }
+
+      window.deleteMock = (id) => {
+        if (confirm("Delete this mock data?")) {
+          db = db.filter((m) => m.id !== id);
+          localStorage.setItem("sscScores_Analytics", JSON.stringify(db));
+          if (editMockId === id) cancelEdit();
+          if (db.length === 0) location.reload();
+          else updateDashboard();
+        }
+      };
+
+      // --- CHROME EXTENSION LISTENER ---
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.runtime &&
+        chrome.runtime.onMessage
+      ) {
+        chrome.runtime.onMessage.addListener(
+          (request, sender, sendResponse) => {
+            if (request.action === "FILL_MOCK_DATA") {
+              const data = request.payload;
+
+              // 1. Auto-select Exam and Tier
+              if ($("globalFilterExam") && data.exam) {
+                // Attempt to select the exam, default to SSC CGL if not found
+                let examOptions = Array.from($("globalFilterExam").options).map(
+                  (o) => o.value,
+                );
+                if (examOptions.includes(data.exam))
+                  $("globalFilterExam").value = data.exam;
+                else $("globalFilterExam").value = "SSC CGL";
+
+                updateGlobalTierFilter();
+              }
+              if ($("globalFilterTier") && data.tier) {
+                let tierOptions = Array.from($("globalFilterTier").options).map(
+                  (o) => o.value,
+                );
+                if (tierOptions.includes(data.tier))
+                  $("globalFilterTier").value = data.tier;
+
+                buildFormTable();
+                updateTopBarStatus();
+              }
+
+              // 2. Fill standard form data
+              if ($("mProv") && data.provider) {
+                let provOptions = Array.from($("mProv").options).map(
+                  (o) => o.value,
+                );
+                if (!provOptions.includes(data.provider)) {
+                  providers.push(data.provider);
+                  localStorage.setItem(
+                    "sscProviders",
+                    JSON.stringify(providers),
+                  );
+                  renderProviders();
+                }
+                $("mProv").value = data.provider;
+              }
+              if ($("mPerc")) $("mPerc").value = data.percentile || "";
+              if ($("mCutoff")) $("mCutoff").value = data.cutoff || "";
+
+              // 3. Fill dynamic section data
+              if (data.sections) {
+                data.sections.forEach((sec) => {
+                  if ($(`c_${sec.id}`)) $(`c_${sec.id}`).value = sec.c || 0;
+                  if ($(`w_${sec.id}`)) $(`w_${sec.id}`).value = sec.w || 0;
+                  if ($(`t_${sec.id}`)) $(`t_${sec.id}`).value = sec.t || 0;
+                });
+              }
+
+              liveCalculate();
+
+              // Pop open the "Add Mock" drawer if it's hidden
+              const form = $("scoreForm");
+              if (form && form.style.display === "none") toggleForm();
+
+              alert(
+                "✅ Gemini successfully extracted the mock data and filled the form!",
+              );
+              sendResponse({ status: "success" });
+            }
+          },
+        );
+      }
+
+      updateDashboard();
+    </script>
+  </body>
 </html>
