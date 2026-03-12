@@ -742,15 +742,7 @@
           <h2>History</h2>
           <div id="historyList" style="max-height: 400px; overflow-y: auto"></div>
           
-          <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-            <h3 style="font-size: 0.9rem; color: var(--muted); margin: 0 0 10px 0">Data Backup</h3>
-            <div class="action-btns-grid">
-              <button class="btn-sm" onclick="exportJSON()">⬇️ Export</button>
-              <button class="btn-sm" onclick="document.getElementById('importJson').click()">⬆️ Import</button>
-            </div>
-            <input type="file" id="importJson" accept=".json" style="display: none" onchange="importJSON(event)" />
-          </div>
-        </div>
+          
 
         <div class="card">
           <h2 style="cursor: pointer; border: none; padding: 0;" onclick="toggleSettings()">
